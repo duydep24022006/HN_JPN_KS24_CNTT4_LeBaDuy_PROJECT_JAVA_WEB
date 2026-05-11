@@ -118,6 +118,12 @@ public class ProfileServiceImpl implements ProfileService {
         doctorRepository.save(doctor);
 
         UserProfile profile = findProfileByUserId(user.getId());
+
+        if (request.getAvatarUrl() != null) {
+            profile.setAvatarUrl(request.getAvatarUrl());
+            userProfileRepository.save(profile);
+        }
+
         return mapToDoctorProfileResponse(user, profile, doctor);
     }
 

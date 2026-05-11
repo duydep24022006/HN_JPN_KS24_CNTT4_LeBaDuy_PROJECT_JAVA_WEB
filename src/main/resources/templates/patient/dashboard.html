@@ -56,59 +56,240 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);display:fle
 </style>
 </head>
 <body>
+
 <div th:replace="~{layout/layout-patient :: sidebar(${profile})}"></div>
+
 <main class="main">
-<div class="topbar">
-    <div><h1>Tổng quan</h1><p>Chào mừng đến với Smart Healthcare</p></div>
-</div>
-<div class="content">
-    <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
-    <div class="welcome-banner">
+
+    <div class="topbar">
         <div>
-            <div class="welcome-title" th:text="'Xin chào, ' + (${profile?.fullName} ?: 'Bệnh nhân') + '! 👋'">Xin chào!</div>
-            <div class="welcome-sub" th:text="${countConfirmed > 0} ? 'Bạn có ' + ${countConfirmed} + ' lịch hẹn đã xác nhận.' : 'Hãy đặt lịch khám để được chăm sóc sức khỏe.'">Chào mừng!</div>
-        </div>
-        <a th:href="@{/patient/appointments/booking}" class="btn-cta">📅 Đặt lịch ngay</a>
-    </div>
-    <div class="grid-4 mb-6">
-        <div class="stat-card"><div class="stat-icon si-blue">📅</div><div><div class="stat-value" th:text="${totalAppointments}">0</div><div class="stat-label">Lịch hẹn tổng</div></div></div>
-        <div class="stat-card"><div class="stat-icon si-green">✅</div><div><div class="stat-value" th:text="${countConfirmed}">0</div><div class="stat-label">Đã xác nhận</div></div></div>
-        <div class="stat-card"><div class="stat-icon si-yellow">⏳</div><div><div class="stat-value" th:text="${countPending}">0</div><div class="stat-label">Chờ xác nhận</div></div></div>
-        <div class="stat-card"><div class="stat-icon si-red">📋</div><div><div class="stat-value" th:text="${totalRecords}">0</div><div class="stat-label">Bệnh án lưu</div></div></div>
-    </div>
-    <div class="grid-2 mb-6">
-        <div class="card">
-            <div class="card-header">
-                <div><div class="card-title">Lịch hẹn sắp tới</div><div class="card-sub">Đã xác nhận & chờ xác nhận</div></div>
-                <a th:href="@{/patient/appointments/booking}" class="btn btn-primary btn-sm">+ Đặt thêm</a>
-            </div>
-            <div class="card-body">
-                <div th:if="${upcomingAppointments.empty and pendingAppointments.empty}" class="empty">Chưa có lịch hẹn sắp tới</div>
-                <div th:each="a : ${upcomingAppointments}" class="appt-item">
-                    <div class="appt-date"><div class="appt-day" th:text="${#temporals.format(a.appointmentDate,'dd')}">01</div><div class="appt-mon" th:text="${#temporals.format(a.appointmentDate,'MM')}">01</div></div>
-                    <div style="flex:1"><div class="appt-doctor" th:text="${'BS. ' + (a.doctor?.user?.profile?.fullName ?: '—')}">BS.</div><div class="appt-spec" th:text="${a.doctor?.specialty?.name ?: ''}"></div><div class="appt-time" th:text="'🕙 ' + (a.appointmentTime != null ? a.appointmentTime.toString().substring(0,5) : '—')"></div></div>
-                    <span class="badge badge-confirmed">✅ Xác nhận</span>
-                </div>
-                <div th:each="a : ${pendingAppointments}" class="appt-item">
-                    <div class="appt-date" style="background:var(--warning-light)"><div class="appt-day" style="color:var(--warning)" th:text="${#temporals.format(a.appointmentDate,'dd')}">01</div><div class="appt-mon" style="color:var(--warning)" th:text="${#temporals.format(a.appointmentDate,'MM')}">01</div></div>
-                    <div style="flex:1"><div class="appt-doctor" th:text="${'BS. ' + (a.doctor?.user?.profile?.fullName ?: '—')}">BS.</div><div class="appt-spec" th:text="${a.doctor?.specialty?.name ?: ''}"></div><div class="appt-time" th:text="'🕙 ' + (a.appointmentTime != null ? a.appointmentTime.toString().substring(0,5) : '—')"></div></div>
-                    <span class="badge badge-pending">⏳ Chờ xác nhận</span>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-header"><div class="card-title">Truy cập nhanh</div></div>
-            <div class="card-body">
-                <div class="grid-2">
-                    <a th:href="@{/patient/appointments/booking}" class="quick-action"><div class="qa-icon blue">📅</div><div class="qa-label">Đặt lịch khám</div><div class="qa-desc">Chọn bác sĩ & khung giờ</div></a>
-                    <a th:href="@{/patient/medical-records}" class="quick-action"><div class="qa-icon green">📋</div><div class="qa-label">Xem bệnh án</div><div class="qa-desc">Lịch sử khám & đơn thuốc</div></a>
-                    <a th:href="@{/patient/profile}" class="quick-action"><div class="qa-icon yellow">👤</div><div class="qa-label">Hồ sơ cá nhân</div><div class="qa-desc">Cập nhật thông tin</div></a>
-                    <a th:href="@{/patient/appointments}" class="quick-action"><div class="qa-icon red">🕒</div><div class="qa-label">Lịch hẹn của tôi</div><div class="qa-desc">Quản lý tất cả lịch hẹn</div></a>
-                </div>
-            </div>
+            <h1>Tổng quan</h1>
+            <p>Chào mừng đến với Smart Healthcare</p>
         </div>
     </div>
-</div>
+
+    <div class="content">
+
+        <div th:if="${successMessage}"
+             class="alert-success"
+             th:text="${successMessage}">
+        </div>
+
+        <div class="welcome-banner">
+
+            <div>
+
+                <div class="welcome-title"
+                     th:text="${'Xin chào, ' + (profile != null and profile.fullName != null ? profile.fullName : 'Bệnh nhân') + '! 👋'}">
+                    Xin chào!
+                </div>
+
+                <div class="welcome-sub"
+                     th:text="${countConfirmed > 0 ? 'Bạn có ' + countConfirmed + ' lịch hẹn đã xác nhận.' : 'Hãy đặt lịch khám để được chăm sóc sức khỏe.'}">
+                    Chào mừng!
+                </div>
+
+            </div>
+
+            <a th:href="@{/patient/appointments/booking}" class="btn-cta">
+                📅 Đặt lịch ngay
+            </a>
+
+        </div>
+
+        <div class="grid-4 mb-6">
+
+            <div class="stat-card">
+                <div class="stat-icon si-blue">📅</div>
+                <div>
+                    <div class="stat-value" th:text="${totalAppointments}">0</div>
+                    <div class="stat-label">Lịch hẹn tổng</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon si-green">✅</div>
+                <div>
+                    <div class="stat-value" th:text="${countConfirmed}">0</div>
+                    <div class="stat-label">Đã xác nhận</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon si-yellow">⏳</div>
+                <div>
+                    <div class="stat-value" th:text="${countPending}">0</div>
+                    <div class="stat-label">Chờ xác nhận</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon si-red">📋</div>
+                <div>
+                    <div class="stat-value" th:text="${totalRecords}">0</div>
+                    <div class="stat-label">Bệnh án lưu</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="grid-2 mb-6">
+
+            <div class="card">
+
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Lịch hẹn sắp tới</div>
+                        <div class="card-sub">Đã xác nhận & chờ xác nhận</div>
+                    </div>
+
+                    <a th:href="@{/patient/appointments/booking}"
+                       class="btn btn-primary btn-sm">
+                        + Đặt thêm
+                    </a>
+                </div>
+
+                <div class="card-body">
+
+                    <div th:if="${upcomingAppointments.empty and pendingAppointments.empty}"
+                         class="empty">
+                        Chưa có lịch hẹn sắp tới
+                    </div>
+
+                    <!-- CONFIRMED -->
+
+                    <div th:each="a : ${upcomingAppointments}" class="appt-item">
+
+                        <div class="appt-date">
+                            <div class="appt-day"
+                                 th:text="${#temporals.format(a.appointmentDate,'dd')}">
+                                01
+                            </div>
+
+                            <div class="appt-mon"
+                                 th:text="${#temporals.format(a.appointmentDate,'MM')}">
+                                01
+                            </div>
+                        </div>
+
+                        <div style="flex:1">
+
+                            <div class="appt-doctor"
+                                 th:text="${'BS. ' + (a.doctor != null and a.doctor.user != null and a.doctor.user.profile != null ? a.doctor.user.profile.fullName : '—')}">
+                                BS.
+                            </div>
+
+                            <div class="appt-spec"
+                                 th:text="${a.doctor != null and a.doctor.specialty != null ? a.doctor.specialty.name : ''}">
+                            </div>
+
+                            <div class="appt-time"
+                                 th:text="${a.appointmentTime != null ? '🕙 ' + #strings.substring(a.appointmentTime.toString(),0,5) : '🕙 —'}">
+                            </div>
+
+                        </div>
+
+                        <span class="badge badge-confirmed">
+                        ✅ Xác nhận
+                    </span>
+
+                    </div>
+
+                    <!-- PENDING -->
+
+                    <div th:each="a : ${pendingAppointments}" class="appt-item">
+
+                        <div class="appt-date"
+                             style="background:var(--warning-light)">
+
+                            <div class="appt-day"
+                                 style="color:var(--warning)"
+                                 th:text="${#temporals.format(a.appointmentDate,'dd')}">
+                                01
+                            </div>
+
+                            <div class="appt-mon"
+                                 style="color:var(--warning)"
+                                 th:text="${#temporals.format(a.appointmentDate,'MM')}">
+                                01
+                            </div>
+
+                        </div>
+
+                        <div style="flex:1">
+
+                            <div class="appt-doctor"
+                                 th:text="${'BS. ' + (a.doctor != null and a.doctor.user != null and a.doctor.user.profile != null ? a.doctor.user.profile.fullName : '—')}">
+                                BS.
+                            </div>
+
+                            <div class="appt-spec"
+                                 th:text="${a.doctor != null and a.doctor.specialty != null ? a.doctor.specialty.name : ''}">
+                            </div>
+
+                            <div class="appt-time"
+                                 th:text="${a.appointmentTime != null ? '🕙 ' + #strings.substring(a.appointmentTime.toString(),0,5) : '🕙 —'}">
+                            </div>
+
+                        </div>
+
+                        <span class="badge badge-pending">
+                        ⏳ Chờ xác nhận
+                    </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- QUICK ACCESS -->
+
+            <div class="card">
+
+                <div class="card-header">
+                    <div class="card-title">Truy cập nhanh</div>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="grid-2">
+
+                        <a th:href="@{/patient/appointments/booking}" class="quick-action">
+                            <div class="qa-icon blue">📅</div>
+                            <div class="qa-label">Đặt lịch khám</div>
+                            <div class="qa-desc">Chọn bác sĩ & khung giờ</div>
+                        </a>
+
+                        <a th:href="@{/patient/medical-records}" class="quick-action">
+                            <div class="qa-icon green">📋</div>
+                            <div class="qa-label">Xem bệnh án</div>
+                            <div class="qa-desc">Lịch sử khám & đơn thuốc</div>
+                        </a>
+
+                        <a th:href="@{/patient/profile}" class="quick-action">
+                            <div class="qa-icon yellow">👤</div>
+                            <div class="qa-label">Hồ sơ cá nhân</div>
+                            <div class="qa-desc">Cập nhật thông tin</div>
+                        </a>
+
+                        <a th:href="@{/patient/appointments}" class="quick-action">
+                            <div class="qa-icon red">🕒</div>
+                            <div class="qa-label">Lịch hẹn của tôi</div>
+                            <div class="qa-desc">Quản lý tất cả lịch hẹn</div>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </main>
+
 </body>
 </html>

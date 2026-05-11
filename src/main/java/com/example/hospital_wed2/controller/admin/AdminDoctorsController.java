@@ -2,7 +2,7 @@ package com.example.hospital_wed2.controller.admin;
 
 import com.example.hospital_wed2.dto.admin.AdminDoctorDto;
 import com.example.hospital_wed2.entity.Gender;
-import com.example.hospital_wed2.service.admin.DoctorService;
+import com.example.hospital_wed2.service.admin.AdminDoctorService;
 import com.example.hospital_wed2.service.admin.SpecialtyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class AdminDoctorsController {
 
-    private final DoctorService doctorService;
+    private final AdminDoctorService doctorService;
     private final SpecialtyService specialtyService;
 
     // ================= LIST + SEARCH =================

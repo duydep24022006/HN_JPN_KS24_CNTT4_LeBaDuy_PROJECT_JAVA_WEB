@@ -9,6 +9,7 @@ import com.example.hospital_wed2.entity.Appointment;
 import com.example.hospital_wed2.entity.AppointmentStatus;
 import com.example.hospital_wed2.entity.MedicalRecord;
 import com.example.hospital_wed2.entity.Prescription;
+import com.example.hospital_wed2.service.FileStorageService;
 import com.example.hospital_wed2.service.doctor.DoctorService;
 import com.example.hospital_wed2.service.profile.ProfileService;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -28,10 +30,12 @@ public class DoctorController {
 
     private final DoctorService doctorService;
     private final ProfileService profileService;
+    private final FileStorageService fileStorageService;
 
-    public DoctorController(DoctorService doctorService, ProfileService profileService) {
+    public DoctorController(DoctorService doctorService, ProfileService profileService, FileStorageService fileStorageService) {
         this.doctorService = doctorService;
         this.profileService = profileService;
+        this.fileStorageService = fileStorageService;
     }
 
     private String currentUsername() {
@@ -189,10 +193,13 @@ public class DoctorController {
     }
 
     @PostMapping("/profile/update")
-    public String updateProfile(@Valid @ModelAttribute("profile") UpdateDoctorProfileRequest request,
-                                BindingResult bindingResult,
-                                Model model,
-                                RedirectAttributes redirectAttrs) {
+    public String updateProfile(
+            @Valid @ModelAttribute("profile") UpdateDoctorProfileRequest request,
+            BindingResult bindingResult,
+            @RequestParam(required = false) MultipartFile avatarFile,
+            Model model,
+            RedirectAttributes redirectAttrs
+    ){
         if (bindingResult.hasErrors()) {
             addProfile(model);
             String errors = bindingResult.getAllErrors().stream()
@@ -202,7 +209,12 @@ public class DoctorController {
             model.addAttribute("errorMessage", errors);
             return "doctor/profile";
         }
+        if (avatarFile != null && !avatarFile.isEmpty()) {
 
+            String fileName = fileStorageService.storeFile(avatarFile);
+
+            request.setAvatarUrl(fileName);
+        }
         try {
             profileService.updateDoctorProfile(currentUsername(), request);
             redirectAttrs.addFlashAttribute("successMessage", "Cập nhật thông tin thành công!");

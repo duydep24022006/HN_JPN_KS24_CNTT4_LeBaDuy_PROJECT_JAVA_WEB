@@ -5,7 +5,7 @@ import com.example.hospital_wed2.entity.Gender;
 
 import java.util.List;
 
-public interface DoctorService {
+public interface AdminDoctorService {
     void saveDoctor(AdminDoctorDto dto);
     List<AdminDoctorDto> getAllDoctors();
     List<AdminDoctorDto> searchDoctors(String keyword, Long specialtyId, Boolean active, Gender gender);

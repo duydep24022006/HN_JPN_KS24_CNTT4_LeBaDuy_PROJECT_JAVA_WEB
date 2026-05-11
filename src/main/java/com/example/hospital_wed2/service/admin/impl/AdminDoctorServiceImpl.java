@@ -4,7 +4,7 @@ import com.example.hospital_wed2.dto.admin.AdminDoctorDto;
 import com.example.hospital_wed2.entity.*;
 import com.example.hospital_wed2.repository.*;
 import com.example.hospital_wed2.service.FileStorageService;
-import com.example.hospital_wed2.service.admin.DoctorService;
+import com.example.hospital_wed2.service.admin.AdminDoctorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class AdminDoctorServiceImpl implements DoctorService {
+public class AdminDoctorServiceImpl implements AdminDoctorService {
 
     private final UserRepository userRepository;
     private final UserProfileRepository profileRepository;
@@ -204,7 +204,7 @@ public class AdminDoctorServiceImpl implements DoctorService {
         }
         try {
             String fileName = fileStorageService.storeFile(dto.getAvatarFile());
-            profile.setAvatarUrl("/uploads/" + fileName);
+            profile.setAvatarUrl(fileName);
         } catch (Exception e) {
             // Không làm gián đoạn save nếu upload ảnh thất bại
         }

@@ -20,6 +20,8 @@ public class UpdateDoctorProfileRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "Phí khám phải lớn hơn 0")
     private BigDecimal consultationFee;
 
+    private String avatarUrl;
+
     // Getters & Setters
     public Long getSpecialtyId() {
         return specialtyId;
@@ -59,5 +61,12 @@ public class UpdateDoctorProfileRequest {
 
     public void setConsultationFee(BigDecimal consultationFee) {
         this.consultationFee = consultationFee;
+    }
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }
