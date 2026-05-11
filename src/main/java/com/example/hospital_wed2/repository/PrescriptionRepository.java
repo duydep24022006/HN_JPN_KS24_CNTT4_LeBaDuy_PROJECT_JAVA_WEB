@@ -12,6 +12,8 @@ import java.util.Optional;
 
 public interface PrescriptionRepository extends JpaRepository<Prescription,Long> {
 
+    // Override findAll để lấy toàn bộ đơn thuốc kèm dữ liệu liên quan
+// EntityGraph giúp load sẵn medicalRecord, appointment, patient, doctor, thuốc...
     @Override
     @EntityGraph(attributePaths = {
             "medicalRecord",
@@ -26,18 +28,26 @@ public interface PrescriptionRepository extends JpaRepository<Prescription,Long>
     })
     List<Prescription> findAll();
 
+    // Lấy danh sách đơn thuốc theo trạng thái
+// Ví dụ: PENDING, COMPLETED, CANCELLED...
     List<Prescription> findByStatus(PrescriptionStatus status);
 
+    // Query tìm đơn thuốc theo status nhưng cho phép status = null
+// Nếu null sẽ lấy tất cả đơn thuốc
     @Query("SELECT p FROM Prescription p WHERE (:status IS NULL OR p.status = :status)")
     List<Prescription> findByStatusOptional(@Param("status") PrescriptionStatus status);
 
+    // Tìm đơn thuốc theo appointmentId
+// Join FETCH details và medicine để lấy luôn chi tiết thuốc
     @Query("SELECT p FROM Prescription p JOIN FETCH p.details d JOIN FETCH d.medicine WHERE p.medicalRecord.appointment.id = :appointmentId")
     Optional<Prescription> findByAppointmentId(@Param("appointmentId") Long appointmentId);
 
-    // BUG-08: Đếm theo status (thay vì findAll() + stream)
+    // Đếm số lượng đơn thuốc theo trạng thái
+// Tối ưu hơn so với findAll rồi stream/filter bằng Java
     long countByStatus(PrescriptionStatus status);
 
-    // BUG-17: findByStatus với EntityGraph để tránh N+1
+    // Lấy danh sách đơn thuốc theo status kèm đầy đủ dữ liệu liên quan
+// Dùng EntityGraph để tránh lỗi N+1 query
     @EntityGraph(attributePaths = {
             "medicalRecord",
             "medicalRecord.appointment",
@@ -51,6 +61,8 @@ public interface PrescriptionRepository extends JpaRepository<Prescription,Long>
     })
     List<Prescription> findWithDetailsByStatus(PrescriptionStatus status);
 
+    // Lấy 5 đơn thuốc mới nhất theo thời gian tạo
+// Dùng cho dashboard hoặc thống kê gần đây
     @Query("SELECT p FROM Prescription p ORDER BY p.createdAt DESC LIMIT 5")
     List<Prescription> findTop5ByOrderByCreatedAtDesc();
 }
