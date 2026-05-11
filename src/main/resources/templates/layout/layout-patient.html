@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar(profile)" class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">✚</div>
+        <div>
+            <div class="logo-text">Smart Healthcare</div>
+            <div class="logo-sub">Nền tảng y tế số</div>
+        </div>
+    </div>
+    <div class="sidebar-user">
+        <div class="user-avatar"
+             th:text="${profile?.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'P'}">P</div>
+        <div>
+            <div class="user-name" th:text="${profile?.fullName ?: 'Bệnh nhân'}">Bệnh nhân</div>
+            <span class="user-role">Bệnh nhân</span>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-title">Chính</div>
+        <a th:href="@{/patient/dashboard}" class="nav-item"
+           th:classappend="${currentUri.contains('/dashboard')} ? ' active' : ''">
+            <div class="nav-icon">🏠</div> Tổng quan
+        </a>
+        <a th:href="@{/patient/appointments/booking}" class="nav-item"
+           th:classappend="${currentUri.contains('/booking')} ? ' active' : ''">
+            <div class="nav-icon">📅</div> Đặt lịch khám
+        </a>
+        <a th:href="@{/patient/appointments}" class="nav-item"
+           th:classappend="${currentUri.contains('/appointments') and !currentUri.contains('/booking')} ? ' active' : ''">
+            <div class="nav-icon">🕒</div> Lịch hẹn của tôi
+        </a>
+        <a th:href="@{/patient/medical-records}" class="nav-item"
+           th:classappend="${currentUri.contains('/medical-records')} ? ' active' : ''">
+            <div class="nav-icon">📋</div> Lịch sử bệnh án
+        </a>
+        <div class="nav-section-title">Tài khoản</div>
+        <a th:href="@{/patient/profile}" class="nav-item"
+           th:classappend="${currentUri.contains('/profile')} ? ' active' : ''">
+            <div class="nav-icon">👤</div> Hồ sơ cá nhân
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <a th:href="@{/logout}" class="nav-item">
+            <div class="nav-icon">🚪</div> Đăng xuất
+        </a>
+    </div>
+</aside>
+</body>
+</html>

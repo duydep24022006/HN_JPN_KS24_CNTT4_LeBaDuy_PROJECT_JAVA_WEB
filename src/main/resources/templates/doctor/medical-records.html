@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Hồ sơ bệnh án | Smart Healthcare</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"/>
+
+    <style> *,*::before,*::after{box-sizing:border-box;margin:0;padding:0} :root{ --primary:#1e40af;--primary-dark:#1340a8;--primary-light:#dbeafe; --doctor:#0d9488;--doctor-dark:#0f766e;--doctor-light:#ccfbf1; --accent:#10b981;--accent-light:#d1fae5; --warning:#f59e0b;--warning-light:#fef3c7; --danger:#ef4444;--danger-light:#fee2e2; --text:#1f2937;--sub:#64748b;--border:#e5e7eb;--bg:#f8fafc;--white:#fff; --sw:260px;--r:14px } body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);display:flex;min-height:100vh;color:var(--text)} .sidebar{width:var(--sw);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;box-shadow:2px 0 12px rgba(0,0,0,.06)} .sidebar-logo{display:flex;align-items:center;gap:10px;padding:22px 20px 18px;border-bottom:1px solid var(--border)} .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--doctor),var(--doctor-dark));border-radius:10px;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0} .logo-text{font-size:14px;font-weight:800;color:var(--text);line-height:1.2}.logo-sub{font-size:11px;color:var(--sub)} .sidebar-user{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);background:#f0fdfa} .user-avatar{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--doctor),var(--doctor-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0} .user-name{font-size:13px;font-weight:700} .user-role{display:inline-block;font-size:10px;background:var(--doctor-light);color:var(--doctor-dark);padding:2px 8px;border-radius:20px;font-weight:600;margin-top:2px} .sidebar-nav{flex:1;padding:12px 12px 0;overflow-y:auto} .nav-section-title{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;padding:12px 10px 6px} .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--sub);font-size:13.5px;font-weight:500;text-decoration:none;transition:.15s;margin-bottom:2px} .nav-item:hover{background:#f0fdfa;color:var(--doctor)}.nav-item.active{background:var(--doctor-light);color:var(--doctor-dark);font-weight:700} .nav-icon{width:20px;text-align:center;font-size:16px;flex-shrink:0} .sidebar-footer{padding:12px;border-top:1px solid var(--border)} .main{flex:1;margin-left:var(--sw);display:flex;flex-direction:column;min-height:100vh} .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50} .topbar h1{font-size:17px;font-weight:800}.topbar p{font-size:12px;color:var(--sub);margin-top:2px} .content{padding:24px 28px;flex:1} .search-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px} .search-form{display:flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:6px 14px;flex:1;max-width:420px} .search-form span{color:var(--sub)} .search-form input{border:none;outline:none;font-family:inherit;font-size:13px;background:transparent;width:100%;color:var(--text)} .search-form button{background:var(--doctor);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer} .records-list{display:flex;flex-direction:column;gap:14px} .record-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden} .record-header{display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer} .record-header:hover{background:#f9fafb} .record-date{width:52px;text-align:center;background:var(--doctor-light);border-radius:10px;padding:8px 4px;flex-shrink:0} .rd-day{font-size:20px;font-weight:800;color:var(--doctor-dark);line-height:1} .rd-mon{font-size:10px;font-weight:700;color:var(--doctor-dark);text-transform:uppercase;margin-top:2px} .record-info{flex:1} .record-patient{font-size:15px;font-weight:700} .record-diagnosis{font-size:12.5px;color:var(--sub);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:400px} .rx-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700} .rx-dispensed{background:#d1fae5;color:#065f46}.rx-pending{background:#fef3c7;color:#92400e} .record-body{padding:16px 20px;display:none} .record-card.expanded .record-body{display:block} .toggle-icon{margin-left:auto;color:var(--sub);font-size:16px;transition:.2s;flex-shrink:0} .record-card.expanded .toggle-icon{transform:rotate(180deg)} .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px} .detail-item{background:#f9fafb;border-radius:10px;padding:12px 14px} .detail-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px} .detail-value{font-size:13px;color:var(--text)} .medicines-list{margin-top:12px;background:#f9fafb;border-radius:10px;padding:12px 14px} .medicine-chip{display:inline-flex;align-items:center;gap:6px;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;margin:3px;color:var(--text)} .empty-state{text-align:center;padding:60px 20px} .empty-icon{font-size:56px;margin-bottom:16px} .empty-title{font-size:17px;font-weight:700;margin-bottom:8px} .empty-sub{font-size:13.5px;color:var(--sub)} .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:.15s;text-decoration:none} .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--sub)}.btn-outline:hover{border-color:var(--doctor);color:var(--doctor)} .btn-sm{padding:5px 12px;font-size:12px} .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px} .stat-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:16px 18px;display:flex;align-items:center;gap:14px} .stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px} .si-teal{background:var(--doctor-light)}.si-yellow{background:var(--warning-light)}.si-blue{background:var(--primary-light)} .stat-value{font-size:22px;font-weight:800}.stat-label{font-size:12px;color:var(--sub);margin-top:2px} </style>
+</head>
+
+<body>
+
+<div th:replace="~{layout/layout-doctor :: sidebar(${profile})}"></div>
+
+<main class="main">
+
+    <div class="topbar">
+        <div>
+            <h1>Hồ sơ bệnh án</h1>
+            <p>Danh sách bệnh án bạn đã lập</p>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- Stats -->
+        <div class="stat-row">
+
+            <div class="stat-card">
+                <div class="stat-icon si-teal">📋</div>
+                <div>
+                    <div class="stat-value"
+                         th:text="${medicalRecords != null ? medicalRecords.size() : 0}">
+                        0
+                    </div>
+                    <div class="stat-label">Tổng bệnh án</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon si-yellow">⏳</div>
+                <div>
+                    <div class="stat-value"
+                         th:text="${pendingCount != null ? pendingCount : 0}">
+                        0
+                    </div>
+                    <div class="stat-label">Đang xử lý</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon si-blue">✓</div>
+                <div>
+                    <div class="stat-value"
+                         th:text="${dispensedCount != null ? dispensedCount : 0}">
+                        0
+                    </div>
+                    <div class="stat-label">Hoàn thành</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Search -->
+        <div class="search-bar">
+
+            <form th:action="@{/doctor/medical-records}"
+                  method="get"
+                  class="search-form">
+
+                <span>🔍</span>
+
+                <input type="text"
+                       name="q"
+                       th:value="${param.q}"
+                       placeholder="Tìm theo tên bệnh nhân hoặc chẩn đoán..."/>
+
+                <button type="submit">Tìm</button>
+
+            </form>
+
+            <a th:if="${param.q != null and param.q != ''}"
+               th:href="@{/doctor/medical-records}"
+               class="btn btn-outline btn-sm">
+
+                Xóa bộ lọc
+
+            </a>
+
+        </div>
+
+        <!-- Empty -->
+        <div th:if="${medicalRecords == null or #lists.isEmpty(medicalRecords)}"
+             class="empty-state">
+
+            <div class="empty-icon">📋</div>
+
+            <div class="empty-title">
+                Chưa có hồ sơ bệnh án
+            </div>
+
+            <div class="empty-sub">
+                Các hồ sơ bệnh án sẽ xuất hiện sau khi bạn hoàn tất khám bệnh.
+            </div>
+
+        </div>
+
+        <!-- Records -->
+        <div class="records-list">
+
+            <div th:each="rec : ${medicalRecords}"
+                 class="record-card">
+
+                <div class="record-header"
+                     onclick="this.closest('.record-card').classList.toggle('expanded')">
+
+                    <!-- Date -->
+                    <div class="record-date">
+
+                        <div class="rd-day"
+                             th:text="${rec.appointment != null and rec.appointment.appointmentDate != null ? #temporals.format(rec.appointment.appointmentDate,'dd') : '--'}">
+                            01
+                        </div>
+
+                        <div class="rd-mon"
+                             th:text="${rec.appointment != null and rec.appointment.appointmentDate != null ? 'Th.' + #temporals.format(rec.appointment.appointmentDate,'M') : '--'}">
+                            Th.1
+                        </div>
+
+                    </div>
+
+                    <!-- Info -->
+                    <div class="record-info">
+
+                        <div class="record-patient"
+                             th:text="${rec.appointment != null and rec.appointment.patient != null and rec.appointment.patient.profile != null and rec.appointment.patient.profile.fullName != null ? rec.appointment.patient.profile.fullName : 'Bệnh nhân'}">
+                            Bệnh nhân
+                        </div>
+
+                        <div class="record-diagnosis"
+                             th:text="${'Chẩn đoán: ' + (rec.diagnosis != null ? rec.diagnosis : '--')}">
+                            Chẩn đoán
+                        </div>
+
+                    </div>
+
+                    <span class="toggle-icon">▼</span>
+
+                </div>
+
+                <!-- Body -->
+                <div class="record-body">
+
+                    <div class="detail-grid">
+
+                        <div class="detail-item">
+
+                            <div class="detail-label">
+                                Triệu chứng
+                            </div>
+
+                            <div class="detail-value"
+                                 th:text="${rec.symptoms != null ? rec.symptoms : 'Không có'}">
+                                --
+                            </div>
+
+                        </div>
+
+                        <div class="detail-item">
+
+                            <div class="detail-label">
+                                Chẩn đoán
+                            </div>
+
+                            <div class="detail-value"
+                                 th:text="${rec.diagnosis != null ? rec.diagnosis : '--'}">
+                                --
+                            </div>
+
+                        </div>
+
+                        <div class="detail-item"
+                             style="grid-column:span 2"
+                             th:if="${rec.notes != null and rec.notes != ''}">
+
+                            <div class="detail-label">
+                                Ghi chú bác sĩ
+                            </div>
+
+                            <div class="detail-value"
+                                 th:text="${rec.notes}">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Button -->
+                    <div style="margin-top:12px;text-align:right">
+
+                        <a th:if="${rec.appointment != null}"
+                           th:href="@{/doctor/appointments/{id}(id=${rec.appointment.id})}"
+                           class="btn btn-outline btn-sm"
+                           onclick="event.stopPropagation()">
+
+                            Xem chi tiết →
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+</body>
+</html>

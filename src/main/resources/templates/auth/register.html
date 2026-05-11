@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Đăng ký | Smart Healthcare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #0066CC;
+            --primary-dark: #004E9A;
+            --accent: #00BFA5;
+            --danger: #E53935;
+            --success: #2E7D32;
+            --text: #1A1D23;
+            --text-muted: #6B7280;
+            --border: #E5E7EB;
+            --bg: #F7F9FC;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 24px;
+        }
+
+        .auth-wrapper {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        /* Panel trái */
+        .auth-brand {
+            width: 340px;
+            flex-shrink: 0;
+            background: linear-gradient(145deg, #00BFA5 0%, #0066CC 60%, #004E9A 100%);
+            padding: 48px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-brand::before {
+            content: '';
+            position: absolute;
+            width: 280px; height: 280px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            bottom: -60px; right: -60px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative; z-index: 1;
+        }
+        .brand-logo svg { width: 36px; height: 36px; }
+        .brand-logo span { font-size: 18px; font-weight: 700; color: white; }
+
+        .brand-content { position: relative; z-index: 1; }
+        .brand-content h2 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 28px;
+            font-weight: 400;
+            color: white;
+            line-height: 1.35;
+            margin-bottom: 14px;
+        }
+        .brand-content h2 em { font-style: italic; color: rgba(255,255,255,0.8); }
+        .brand-content p { font-size: 13.5px; color: rgba(255,255,255,0.75); line-height: 1.7; }
+
+        .step-list { position: relative; z-index: 1; }
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .step-num {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .step-text { font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.5; padding-top: 3px; }
+
+        /* Panel phải - form */
+        .auth-form-panel {
+            flex: 1;
+            background: var(--white);
+            padding: 44px 40px;
+            overflow-y: auto;
+        }
+
+        .form-header { margin-bottom: 28px; }
+        .form-header h1 { font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; margin-bottom: 4px; }
+        .form-header p { font-size: 14px; color: var(--text-muted); }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .alert-error { background: #FEF2F2; color: var(--danger); border: 1px solid #FECACA; }
+
+        /* 2 cột cho form */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 7px;
+        }
+        .form-group label .required { color: var(--danger); margin-left: 2px; }
+
+        .input-wrapper { position: relative; }
+        .input-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+        .form-control {
+            width: 100%;
+            padding: 11px 13px 11px 40px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            outline: none;
+        }
+        .form-control:focus {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(0,102,204,0.1);
+        }
+        .form-control.is-invalid { border-color: var(--danger); }
+        .error-msg {
+            font-size: 11.5px;
+            color: var(--danger);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        /* Divider tiêu đề nhóm */
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            margin-top: 4px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Password strength */
+        .password-hint {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            margin-top: 6px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0,102,204,0.35);
+        }
+        .btn-primary:active { transform: translateY(0); }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .form-footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
+        .form-footer a:hover { text-decoration: underline; }
+
+        .terms {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 12px;
+            line-height: 1.6;
+        }
+        .terms a { color: var(--primary); text-decoration: none; }
+
+        @media (max-width: 700px) {
+            .auth-brand { display: none; }
+            .form-row { grid-template-columns: 1fr; }
+            .auth-form-panel { padding: 32px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-wrapper">
+
+    <!-- Panel trái -->
+    <div class="auth-brand">
+        <div class="brand-logo">
+            <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="36" height="36" rx="10" fill="rgba(255,255,255,0.15)"/>
+                <path d="M18 8v20M8 18h20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span>Smart Healthcare</span>
+        </div>
+
+        <div class="brand-content">
+            <h2>Tạo tài khoản <em>bệnh nhân</em> miễn phí</h2>
+            <p>Chỉ mất 1 phút để bắt đầu hành trình chăm sóc sức khỏe thông minh cùng chúng tôi.</p>
+        </div>
+
+        <div class="step-list">
+            <div class="step-item">
+                <div class="step-num">1</div>
+                <div class="step-text">Điền thông tin cơ bản của bạn</div>
+            </div>
+            <div class="step-item">
+                <div class="step-num">2</div>
+                <div class="step-text">Xác nhận email & đăng nhập</div>
+            </div>
+            <div class="step-item">
+                <div class="step-num">3</div>
+                <div class="step-text">Đặt lịch khám và theo dõi hồ sơ</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel phải - Form đăng ký -->
+    <div class="auth-form-panel">
+        <div class="form-header">
+            <h1>Đăng ký tài khoản</h1>
+            <p>Điền đầy đủ thông tin bên dưới để tạo tài khoản mới</p>
+        </div>
+
+        <!-- Thông báo lỗi server -->
+        <div class="alert alert-error" th:if="${errorMessage}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <span th:text="${errorMessage}"></span>
+        </div>
+        <div class="alert alert-error" th:if="${error}" style="margin-bottom: 20px;">
+            <span th:text="${error}"></span>
+        </div>
+        <form th:action="@{/register}" th:object="${registerDTO}" method="post" novalidate>
+
+            <div class="section-label">Thông tin tài khoản</div>
+
+            <div class="form-row">
+                <!-- Username -->
+                <div class="form-group">
+                    <label for="username">Tên người dùng <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <input type="text" id="username" th:field="*{username}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                               placeholder="vd: nguyenvana" autocomplete="username"/>
+                    </div>
+                    <div class="error-msg" th:if="${#fields.hasErrors('username')}">
+                        <span th:errors="*{username}"></span>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        <input type="email" id="email" th:field="*{email}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                               placeholder="vd: nguyenvana@gmail.com" autocomplete="email"/>
+                    </div>
+                    <div class="error-msg" th:if="${#fields.hasErrors('email')}">
+                        <span th:errors="*{email}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="password">Mật khẩu <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <input type="password" id="password" th:field="*{password}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                               placeholder="Tối thiểu 6 ký tự" autocomplete="new-password"/>
+                    </div>
+                    <div class="error-msg" th:if="${#fields.hasErrors('password')}">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        <span th:errors="*{password}"></span>
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="form-group">
+                    <label for="confirmPassword">Xác nhận mật khẩu <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+                        <input type="password" id="confirmPassword" th:field="*{confirmPassword}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                               placeholder="Nhập lại mật khẩu" autocomplete="new-password"/>
+                    </div>
+                    <div class="error-msg" th:if="${#fields.hasErrors('confirmPassword')}">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        <span th:errors="*{confirmPassword}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-label">Thông tin cá nhân</div>
+
+            <div class="form-row">
+                <!-- Full Name -->
+                <div class="form-group">
+                    <label for="fullName">Họ và tên <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <input type="text" id="fullName" th:field="*{fullName}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'"
+                               placeholder="vd: Nguyễn Văn A"/>
+                    </div>
+                    <div class="error-msg" th:if="${#fields.hasErrors('fullName')}">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        <span th:errors="*{fullName}"></span>
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div class="form-group">
+                    <label for="phoneNumber">Số điện thoại <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.4 2 2 0 0 1 3.6 2.21h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.71 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.16 6.16l.96-.96a2 2 0 0 1 2.11-.45c.91.35 1.85.58 2.81.71A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                        <input type="tel" id="phoneNumber" th:field="*{phoneNumber}"
+                               class="form-control" th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid'"
+                               placeholder="vd: 0912345678"/>
+                    </div>
+                    <div class="error-msg" th:if="${#fields.hasErrors('phoneNumber')}">
+                        <span th:errors="*{phoneNumber}"></span>
+                    </div>
+
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Tạo tài khoản</button>
+
+            <p class="terms">Bằng cách đăng ký, bạn đồng ý với <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a> của chúng tôi.</p>
+        </form>
+
+        <div class="form-footer">
+            Đã có tài khoản? <a th:href="@{/login}">Đăng nhập ngay</a>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

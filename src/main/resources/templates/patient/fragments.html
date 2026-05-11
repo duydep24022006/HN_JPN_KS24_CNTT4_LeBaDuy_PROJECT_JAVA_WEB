@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<aside th:fragment="sidebar" class="sidebar">
+    <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><i class="ti ti-heart-rate-monitor"></i></div>
+        <div>
+            <div class="sidebar-logo-text">Smart Healthcare</div>
+            <div class="sidebar-logo-sub">Cổng bệnh nhân</div>
+        </div>
+    </div>
+
+    <div class="sidebar-user">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div class="sidebar-user-avatar">
+                <img th:if="${profile?.avatarUrl != null}" th:src="${profile.avatarUrl}">
+                <span th:if="${profile?.avatarUrl == null}"
+                      th:text="${profile?.fullName != null ? #strings.substring(profile.fullName,0,1) : 'U'}"></span>
+            </div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" th:text="${profile?.fullName ?: 'Bệnh nhân'}"></div>
+                <div class="sidebar-user-role">Bệnh nhân</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section">Tổng quan</div>
+        <a th:href="@{/patient/dashboard}" th:class="${activePage == 'dashboard'} ? 'nav-item active' : 'nav-item'">
+            <i class="ti ti-layout-dashboard"></i> Trang chủ
+        </a>
+        <div class="nav-section" style="margin-top:8px;">Dịch vụ</div>
+        <a th:href="@{/patient/appointments/book}" th:class="${activePage == 'book'} ? 'nav-item active' : 'nav-item'">
+            <i class="ti ti-calendar-plus"></i> Đặt lịch khám
+        </a>
+        <a th:href="@{/patient/appointments}" th:class="${activePage == 'appointments'} ? 'nav-item active' : 'nav-item'">
+            <i class="ti ti-calendar-event"></i> Lịch hẹn của tôi
+        </a>
+        <a th:href="@{/patient/medical-records}" th:class="${activePage == 'records'} ? 'nav-item active' : 'nav-item'">
+            <i class="ti ti-file-medical"></i> Hồ sơ bệnh án
+        </a>
+        <div class="nav-section" style="margin-top:8px;">Tài khoản</div>
+        <a th:href="@{/patient/profile}" th:class="${activePage == 'profile'} ? 'nav-item active' : 'nav-item'">
+            <i class="ti ti-user-circle"></i> Hồ sơ cá nhân
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn" style="background:none;border:none;cursor:pointer;width:100%;">
+                <i class="ti ti-logout"></i> Đăng xuất
+            </button>
+        </form>
+    </div>
+</aside>
+
+</body>
+</html>

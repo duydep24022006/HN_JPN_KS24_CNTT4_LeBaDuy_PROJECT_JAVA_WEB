@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Khám bệnh | Smart Healthcare</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --primary:#1e40af;--primary-dark:#1340a8;--primary-light:#dbeafe;
+            --doctor:#0d9488;--doctor-dark:#0f766e;--doctor-light:#ccfbf1;
+            --accent:#10b981;--accent-light:#d1fae5;
+            --warning:#f59e0b;--warning-light:#fef3c7;
+            --danger:#ef4444;--danger-light:#fee2e2;
+            --text:#1f2937;--sub:#64748b;--border:#e5e7eb;--bg:#f8fafc;--white:#fff;
+            --sw:260px;--r:14px
+        }
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);display:flex;min-height:100vh;color:var(--text)}
+        .sidebar{width:var(--sw);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;box-shadow:2px 0 12px rgba(0,0,0,.06)}
+        .sidebar-logo{display:flex;align-items:center;gap:10px;padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+        .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--doctor),var(--doctor-dark));border-radius:10px;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+        .logo-text{font-size:14px;font-weight:800;color:var(--text);line-height:1.2}.logo-sub{font-size:11px;color:var(--sub)}
+        .sidebar-user{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);background:#f0fdfa}
+        .user-avatar{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--doctor),var(--doctor-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+        .user-name{font-size:13px;font-weight:700}
+        .user-role{display:inline-block;font-size:10px;background:var(--doctor-light);color:var(--doctor-dark);padding:2px 8px;border-radius:20px;font-weight:600;margin-top:2px}
+        .sidebar-nav{flex:1;padding:12px 12px 0;overflow-y:auto}
+        .nav-section-title{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;padding:12px 10px 6px}
+        .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--sub);font-size:13.5px;font-weight:500;text-decoration:none;transition:.15s;margin-bottom:2px}
+        .nav-item:hover{background:#f0fdfa;color:var(--doctor)}.nav-item.active{background:var(--doctor-light);color:var(--doctor-dark);font-weight:700}
+        .nav-icon{width:20px;text-align:center;font-size:16px;flex-shrink:0}
+        .sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+        .main{flex:1;margin-left:var(--sw);display:flex;flex-direction:column;min-height:100vh}
+        .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
+        .topbar h1{font-size:17px;font-weight:800}.topbar p{font-size:12px;color:var(--sub);margin-top:2px}
+        .back-btn{display:flex;align-items:center;gap:6px;color:var(--sub);font-size:13px;font-weight:600;text-decoration:none;padding:6px 12px;border-radius:8px;border:1.5px solid var(--border);transition:.15s;flex-shrink:0}
+        .back-btn:hover{border-color:var(--doctor);color:var(--doctor)}
+        .content{padding:24px 28px;flex:1}
+        .page-grid{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start}
+        .patient-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden;position:sticky;top:78px}
+        .patient-header{background:linear-gradient(135deg,var(--doctor),var(--doctor-dark));padding:24px 20px;text-align:center;color:#fff}
+        .patient-avatar{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin:0 auto 12px;border:3px solid rgba(255,255,255,.4)}
+        .patient-full-name{font-size:17px;font-weight:800;margin-bottom:4px}
+        .patient-email{font-size:12px;opacity:.8}
+        .patient-body{padding:16px 20px}
+        .info-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+        .info-row:last-child{border-bottom:none}
+        .info-label{color:var(--sub);font-weight:500}
+        .info-value{font-weight:700;text-align:right}
+        .appt-status-box{margin:16px 20px;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:var(--doctor-light)}
+        .status-dot{width:10px;height:10px;border-radius:50%;background:var(--doctor-dark);flex-shrink:0}
+        .status-label{font-size:13px;font-weight:700;color:var(--doctor-dark)}
+        .status-sub{font-size:11px;color:var(--doctor);margin-top:2px}
+        .exam-section{display:flex;flex-direction:column;gap:20px}
+        .card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+        .card-header{padding:18px 20px 0;display:flex;align-items:center;gap:10px}
+        .card-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+        .ci-teal{background:var(--doctor-light)}.ci-blue{background:var(--primary-light)}.ci-yellow{background:var(--warning-light)}
+        .card-title{font-size:15px;font-weight:700}
+        .card-sub{font-size:12px;color:var(--sub);margin-top:2px}
+        .card-body{padding:16px 20px 20px}
+        .form-group{margin-bottom:16px}
+        .form-group:last-child{margin-bottom:0}
+        label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+        label span.req{color:var(--danger);margin-left:2px}
+        input[type=text],input[type=number],select,textarea{
+            width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;
+            font-family:inherit;font-size:13.5px;color:var(--text);background:var(--white);transition:.15s;outline:none}
+        input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--doctor);box-shadow:0 0 0 3px rgba(13,148,136,.1)}
+        textarea{resize:vertical;min-height:100px}
+        .field-error{color:var(--danger);font-size:12px;margin-top:4px;display:block}
+        .medicine-table{width:100%;border-collapse:collapse;font-size:13px}
+        .medicine-table th{text-align:left;padding:10px;color:var(--sub);font-weight:600;font-size:11px;text-transform:uppercase;border-bottom:2px solid var(--border)}
+        .medicine-table td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle}
+        .medicine-table tr:last-child td{border-bottom:none}
+        .medicine-table select,.medicine-table input{padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;outline:none;width:100%;background:var(--white)}
+        .medicine-table select:focus,.medicine-table input:focus{border-color:var(--doctor)}
+        .btn-add-row{display:flex;align-items:center;gap:6px;color:var(--doctor);font-size:13px;font-weight:700;border:1.5px dashed var(--doctor);background:transparent;border-radius:10px;padding:8px 16px;cursor:pointer;font-family:inherit;transition:.15s;width:100%;justify-content:center;margin-top:12px}
+        .btn-add-row:hover{background:var(--doctor-light)}
+        .btn-remove{width:28px;height:28px;border-radius:8px;background:var(--danger-light);color:var(--danger);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:.15s;flex-shrink:0}
+        .btn-remove:hover{background:#fecaca}
+        .submit-bar{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.06);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+        .btn{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:.15s;text-decoration:none}
+        .btn-submit{background:var(--doctor);color:#fff;flex:1;justify-content:center}.btn-submit:hover{background:var(--doctor-dark)}
+        .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--sub)}.btn-outline:hover{border-color:var(--doctor);color:var(--doctor)}
+        .btn-danger{background:var(--danger-light);color:var(--danger)}.btn-danger:hover{background:#fecaca}
+        .alert-success{background:var(--accent-light);color:#065f46;border:1px solid #6ee7b7;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px}
+        .alert-error{background:var(--danger-light);color:#991b1b;border:1px solid #fca5a5;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px}
+        .view-field{padding:10px 14px;background:#f9fafb;border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;color:var(--text);min-height:44px}
+        .rx-detail{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+        .rx-detail:last-child{border-bottom:none}
+        .rx-num{width:24px;height:24px;border-radius:50%;background:var(--doctor-light);color:var(--doctor-dark);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .rx-name{flex:1;font-weight:600}
+        .rx-meta{color:var(--sub);font-size:12px}
+    </style>
+</head>
+<body>
+<div th:replace="~{layout/layout-doctor :: sidebar(${profile})}"></div>
+<main class="main">
+    <div class="topbar">
+        <a th:href="@{/doctor/appointments}" class="back-btn">&#8592; Quay l&#7841;i</a>
+        <div>
+            <h1>Chi ti&#7871;t l&#7883;ch h&#7865;n</h1>
+            <p th:text="${appointment?.patient?.profile?.fullName ?: appointment?.patient?.username ?: 'B&#7879;nh nh&#226;n'}">B&#7879;nh nh&#226;n</p>
+        </div>
+    </div>
+    <div class="content">
+        <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="alert-error" th:text="${errorMessage}"></div>
+
+        <div class="page-grid">
+            <div>
+                <div class="patient-card">
+                    <div class="patient-header">
+                        <div class="patient-avatar"
+                             th:text="${appointment?.patient?.profile?.fullName != null ? appointment.patient.profile.fullName.substring(0,1).toUpperCase() : 'P'}">P</div>
+                        <div class="patient-full-name" th:text="${appointment?.patient?.profile?.fullName ?: appointment?.patient?.username ?: 'B&#7879;nh nh&#226;n'}">B&#7879;nh nh&#226;n</div>
+                        <div class="patient-email" th:text="${appointment?.patient?.email ?: ''}">email</div>
+                    </div>
+                    <div class="appt-status-box"
+                         th:style="${appointment?.status?.name() == 'PENDING'} ? 'background:var(--warning-light)' :
+                                (${appointment?.status?.name() == 'COMPLETED'} ? 'background:#e0e7ff' :
+                                (${appointment?.status?.name() == 'CANCELLED'} ? 'background:#f3f4f6' : ''))">
+                        <div class="status-dot"
+                             th:style="${appointment?.status?.name() == 'PENDING'} ? 'background:var(--warning)' :
+                                    (${appointment?.status?.name() == 'COMPLETED'} ? 'background:#3730a3' :
+                                    (${appointment?.status?.name() == 'CANCELLED'} ? 'background:#9ca3af' : ''))"></div>
+                        <div>
+                            <div class="status-label"
+                                 th:style="${appointment?.status?.name() == 'PENDING'} ? 'color:var(--warning)' :
+                                        (${appointment?.status?.name() == 'COMPLETED'} ? 'color:#3730a3' :
+                                        (${appointment?.status?.name() == 'CANCELLED'} ? 'color:#6b7280' : ''))"
+                                 th:text="${appointment?.status?.name() == 'CONFIRMED'} ? '&#272;&#227; x&#225;c nh&#7853;n &#8211; S&#7861;n s&#224;ng kh&#225;m' :
+                                       (${appointment?.status?.name() == 'PENDING'} ? 'Ch&#7901; x&#225;c nh&#7853;n' :
+                                       (${appointment?.status?.name() == 'COMPLETED'} ? '&#272;&#227; ho&#224;n th&#224;nh kh&#225;m' : '&#272;&#227; h&#7911;y'))">Tr&#7841;ng th&#225;i</div>
+                            <div class="status-sub"
+                                 th:text="${appointment?.appointmentDate != null ? #temporals.format(appointment.appointmentDate,'dd/MM/yyyy') : '--'} + ' | ' + (${appointment?.appointmentTime != null ? appointment.appointmentTime.toString().substring(0,5) : '--:--'})">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="patient-body">
+                        <div class="info-row">
+                            <span class="info-label">Ng&#224;y kh&#225;m</span>
+                            <span class="info-value" th:text="${appointment?.appointmentDate != null ? #temporals.format(appointment.appointmentDate,'dd/MM/yyyy') : '--'}">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Gi&#7901; kh&#225;m</span>
+                            <span class="info-value" th:text="${appointment?.appointmentTime != null ? appointment.appointmentTime.toString().substring(0,5) : '--'}">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">L&#253; do kh&#225;m</span>
+                            <span class="info-value" style="max-width:160px;text-align:right" th:text="${appointment?.reason ?: 'Kh&#244;ng c&#243;'}">--</span>
+                        </div>
+                        <div class="info-row" th:if="${appointment?.note != null and appointment?.note != ''}">
+                            <span class="info-label">Ghi ch&#250; BN</span>
+                            <span class="info-value" style="max-width:160px;text-align:right" th:text="${appointment?.note}">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Chuy&#234;n khoa</span>
+                            <span class="info-value" th:text="${profile?.specialtyName ?: '--'}">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="exam-section">
+
+                <!-- COMPLETED: read-only -->
+                <div th:if="${appointment?.status?.name() == 'COMPLETED'}">
+                    <div class="card" th:if="${medicalRecord != null}">
+                        <div class="card-header">
+                            <div class="card-icon ci-teal">&#128298;</div>
+                            <div><div class="card-title">K&#7871;t qu&#7843; kh&#225;m</div><div class="card-sub">H&#7891; s&#417; b&#7879;nh &#225;n &#273;&#227; &#273;&#432;&#7907;c l&#432;u</div></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Tri&#7879;u ch&#7913;ng</label>
+                                <div class="view-field" th:text="${medicalRecord?.symptoms ?: '--'}">--</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Ch&#7849;n &#273;o&#225;n</label>
+                                <div class="view-field" th:text="${medicalRecord?.diagnosis ?: '--'}">--</div>
+                            </div>
+                            <div class="form-group" th:if="${medicalRecord?.notes != null and medicalRecord?.notes != ''}">
+                                <label>Ghi ch&#250; b&#225;c s&#297;</label>
+                                <div class="view-field" th:text="${medicalRecord.notes}">--</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" th:if="${prescription != null}">
+                        <div class="card-header">
+                            <div class="card-icon ci-blue">&#128138;</div>
+                            <div>
+                                <div class="card-title">&#272;&#417;n thu&#7889;c</div>
+                                <div class="card-sub" th:text="${prescription?.status?.name() == 'DISPENSED'} ? '&#272;&#227; c&#7845;p ph&#225;t' : 'Ch&#7901; duy&#7879;t'">Tr&#7841;ng th&#225;i</div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div th:each="detail, iter : ${prescription?.details}" class="rx-detail">
+                                <div class="rx-num" th:text="${iter.index + 1}">1</div>
+                                <div class="rx-name" th:text="${detail?.medicine?.name ?: '--'}">Thu&#7889;c</div>
+                                <div class="rx-meta">
+                                    <span th:text="'SL: ' + (${detail?.quantity ?: 0})">SL: 0</span> &nbsp;&#183;&nbsp;
+                                    <span th:text="${detail?.dosage ?: ''}">Li&#7873;u d&#249;ng</span>
+                                </div>
+                            </div>
+                            <div th:if="${prescription?.details == null or prescription?.details.empty}"
+                                 style="text-align:center;padding:20px;color:var(--sub);font-size:13px">Kh&#244;ng c&#243; thu&#7889;c</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONFIRMED: examination form -->
+                <div th:if="${appointment?.status?.name() == 'CONFIRMED'}">
+                    <form th:action="@{/doctor/appointments/{id}/examine(id=${appointment.id})}"
+                          th:object="${examineRequest}" method="post">
+                        <div class="card" style="margin-bottom:20px">
+                            <div class="card-header">
+                                <div class="card-icon ci-teal">&#128298;</div>
+                                <div><div class="card-title">K&#7871;t qu&#7843; kh&#225;m</div><div class="card-sub">Nh&#7853;p tri&#7879;u ch&#7913;ng v&#224; ch&#7849;n &#273;o&#225;n</div></div>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>Tri&#7879;u ch&#7913;ng <span class="req">*</span></label>
+                                    <textarea th:field="*{symptoms}" rows="3" placeholder="M&#244; t&#7843; c&#225;c tri&#7879;u ch&#7913;ng b&#7879;nh nh&#226;n b&#225;o c&#225;o..." required></textarea>
+                                    <span class="field-error" th:if="${#fields.hasErrors('symptoms')}" th:errors="*{symptoms}"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label>Ch&#7849;n &#273;o&#225;n <span class="req">*</span></label>
+                                    <textarea th:field="*{diagnosis}" rows="3" placeholder="Nh&#7853;p ch&#7849;n &#273;o&#225;n b&#7879;nh..." required></textarea>
+                                    <span class="field-error" th:if="${#fields.hasErrors('diagnosis')}" th:errors="*{diagnosis}"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label>Ghi ch&#250; (tự chọn)</label>
+                                    <textarea th:field="*{doctorNote}" rows="2" placeholder="L&#432;u &#253; th&#234;m cho b&#7879;nh nh&#226;n ho&#7863;c d&#432;&#7907;c s&#297;..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-bottom:20px">
+                            <div class="card-header">
+                                <div class="card-icon ci-blue">&#128138;</div>
+                                <div><div class="card-title">K&#234; &#273;&#417;n thu&#7889;c <span class="req">*</span></div><div class="card-sub">Ch&#7885;n thu&#7889;c t&#7915; danh m&#7909;c v&#224; nh&#7853;p li&#7873;u d&#249;ng</div></div>
+                            </div>
+                            <div class="card-body">
+                                <span class="field-error" th:if="${#fields.hasErrors('medicineIds')}" th:errors="*{medicineIds}"></span>
+                                <table class="medicine-table">
+                                    <thead>
+                                    <tr>
+                                        <th style="width:36%">T&#234;n thu&#7889;c</th>
+                                        <th style="width:16%">S&#7889; l&#432;&#7907;ng</th>
+                                        <th style="width:32%">Li&#7873;u d&#249;ng</th>
+                                        <th style="width:8%"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="rxBody">
+                                    <tr id="rx-row-1">
+                                        <td>
+                                            <select name="medicineIds" required>
+                                                <option value="">-- Ch&#7885;n thu&#7889;c --</option>
+                                                <option th:each="med : ${medicines}" th:value="${med.id}"
+                                                        th:text="${med.name + ' (' + (med.unit ?: '') + ')'}">Thu&#7889;c</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="number" name="quantities" min="1" value="1" required/></td>
+                                        <td><input type="text" name="dosages" placeholder="VD: 2 vi&#234;n/ng&#224;y sau &#259;n" maxlength="100"/></td>
+                                        <td style="text-align:center"><button type="button" class="btn-remove" onclick="removeRow(this)">&#10005;</button></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <button type="button" class="btn-add-row" onclick="addRow()">+ Th&#234;m thu&#7889;c</button>
+                            </div>
+                        </div>
+
+                        <div class="submit-bar">
+                            <a th:href="@{/doctor/appointments}" class="btn btn-outline">&#8592; Quay l&#7841;i</a>
+                            <button type="submit" class="btn btn-submit">&#128298; Ho&#224;n t&#7845;t kh&#225;m &amp; L&#432;u b&#7879;nh &#225;n</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- PENDING: confirm/cancel -->
+                <div th:if="${appointment?.status?.name() == 'PENDING'}">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon ci-yellow">&#8987;</div>
+                            <div><div class="card-title">L&#7883;ch h&#7865;n ch&#7901; x&#225;c nh&#7853;n</div><div class="card-sub">X&#225;c nh&#7853;n &#273;&#7875; ch&#7845;p nh&#7853;n l&#7883;ch h&#7865;n n&#224;y</div></div>
+                        </div>
+                        <div class="card-body">
+                            <p style="font-size:13.5px;color:var(--sub);margin-bottom:16px;line-height:1.6">B&#7879;nh nh&#226;n &#273;&#227; &#273;&#7863;t l&#7883;ch h&#7865;n v&#224; &#273;ang ch&#7901; b&#225;c s&#297; x&#225;c nh&#7853;n.</p>
+                            <div style="display:flex;gap:10px">
+                                <form th:action="@{/doctor/appointments/{id}/confirm(id=${appointment.id})}" method="post" style="flex:1">
+                                    <button type="submit" class="btn btn-submit" style="width:100%;justify-content:center">&#10003; X&#225;c nh&#7853;n l&#7883;ch h&#7865;n</button>
+                                </form>
+                                <form th:action="@{/doctor/appointments/{id}/cancel(id=${appointment.id})}" method="post"
+                                      onsubmit="return confirm('B&#7841;n c&#243; ch&#7855;c mu&#7889;n h&#7911;y l&#7883;ch h&#7865;n n&#224;y kh&#244;ng?')">
+                                    <button type="submit" class="btn btn-danger">&#10007; H&#7911;y</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CANCELLED -->
+                <div th:if="${appointment?.status?.name() == 'CANCELLED'}">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background:#f3f4f6">&#10007;</div>
+                            <div><div class="card-title">L&#7883;ch h&#7865;n &#273;&#227; b&#7883; h&#7911;y</div><div class="card-sub">L&#7883;ch h&#7865;n n&#224;y kh&#244;ng c&#242;n hi&#7879;u l&#7921;c</div></div>
+                        </div>
+                        <div class="card-body">
+                            <p style="font-size:13.5px;color:var(--sub)">L&#7883;ch h&#7865;n n&#224;y &#273;&#227; b&#7883; h&#7911;y v&#224; kh&#244;ng th&#7875; ch&#7881;nh s&#7917;a.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    let rowCount = 1;
+    function addRow() {
+        rowCount++;
+        const tbody = document.getElementById('rxBody');
+        const firstSelect = tbody.querySelector('select[name="medicineIds"]');
+        const options = firstSelect ? firstSelect.innerHTML : '';
+        const tr = document.createElement('tr');
+        tr.id = 'rx-row-' + rowCount;
+        tr.innerHTML = '<td><select name="medicineIds" required>' + options + '</select></td>'
+            + '<td><input type="number" name="quantities" min="1" value="1" required/></td>'
+            + '<td><input type="text" name="dosages" placeholder="VD: 2 vien/ngay sau an" maxlength="100"/></td>'
+            + '<td style="text-align:center"><button type="button" class="btn-remove" onclick="removeRow(this)">&#10005;</button></td>';
+        tbody.appendChild(tr);
+    }
+    function removeRow(btn) {
+        if (document.querySelectorAll('#rxBody tr').length > 1)
+            btn.closest('tr').remove();
+    }
+</script>
+</body>
+</html>

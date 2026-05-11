@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết đơn thuốc | Thêm / Sửa thuốc</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --sh-blue: #1a5fb4;
+            --sh-blue-dark: #1353a0;
+            --sh-blue-light: #e8f0fb;
+            --sidebar-w: 220px;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f4f9;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--sh-blue-dark);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-logo {
+            padding: 20px 18px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--sh-blue-dark);
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .logo-text {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .logo-sub {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 10px;
+        }
+
+        .nav-section {
+            padding: 12px 0 4px;
+        }
+
+        .nav-label {
+            padding: 4px 16px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 16px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.13);
+            color: white;
+            border-left-color: white;
+        }
+
+        .nav-item i {
+            font-size: 16px;
+            width: 18px;
+            text-align: center;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 10px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+
+        .admin-info:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .admin-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .admin-name {
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .admin-role {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+        }
+        .main {
+            flex: 1;
+            margin-left: 220px;
+            padding: 30px;
+        }
+        .card {
+            background: white;
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            padding: 28px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #111827;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #4b5563;
+        }
+        input, select, textarea {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1a5fb4;
+            box-shadow: 0 0 0 2px rgba(26,95,180,0.1);
+        }
+        .error-message {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .btn-sm {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid #d1d5db;
+            background: white;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #1a5fb4;
+            color: white;
+            border-color: #1a5fb4;
+        }
+        .btn-primary:hover {
+            background: #1353a0;
+        }
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{layout/layout :: sidebar}"></div>
+<div class="main">
+    <div class="topbar">
+        <div>
+            <div class="page-title">Chi tiết đơn thuốc #<span th:text="${prescription.id}"></span></div>
+            <div class="page-sub">Thông tin đơn thuốc và các loại thuốc</div>
+        </div>
+    </div>
+    <div class="content">
+
+        <!-- Flash -->
+        <div th:if="${successMessage}" style="background:#dcfce7;color:#15803d;border:1px solid #86efac;border-radius:8px;padding:10px 16px;margin-bottom:14px;font-size:13px;">
+            <i class="ti ti-circle-check"></i> <span th:text="${successMessage}"></span>
+        </div>
+
+        <!-- Back -->
+        <div style="margin-bottom:14px;">
+            <a th:href="@{/admin/prescriptions}" class="btn-sm">
+                <i class="ti ti-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
+
+        <!-- Info cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+
+            <!-- Patient info -->
+            <div class="card" style="padding:16px;">
+                <div class="section-title" style="margin-bottom:12px;">Thông tin bệnh nhân</div>
+                <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#6b7280;">Họ tên:</span>
+                        <span style="font-weight:500;" th:text="${prescription.medicalRecord?.appointment?.patient?.profile?.fullName ?: '-'}"></span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#6b7280;">Email:</span>
+                        <span th:text="${prescription.medicalRecord?.appointment?.patient?.email ?: '-'}"></span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#6b7280;">SĐT:</span>
+                        <span th:text="${prescription.medicalRecord?.appointment?.patient?.profile?.phoneNumber ?: '-'}"></span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#6b7280;">Ngày khám:</span>
+                        <span th:text="${prescription.medicalRecord?.appointment?.appointmentDate != null ? #temporals.format(prescription.medicalRecord.appointment.appointmentDate, 'dd/MM/yyyy') : '-'}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doctor + status info -->
+            <div class="card" style="padding:16px;">
+                <div class="section-title" style="margin-bottom:12px;">Thông tin bác sĩ & Trạng thái</div>
+                <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#6b7280;">Bác sĩ:</span>
+                        <span style="font-weight:500;" th:text="${prescription.medicalRecord?.appointment?.doctor?.user?.profile?.fullName ?: '-'}"></span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#6b7280;">Chẩn đoán:</span>
+                        <span th:text="${prescription.medicalRecord?.diagnosis ?: '-'}"></span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="color:#6b7280;">Trạng thái:</span>
+                        <span class="badge"
+                              th:classappend="${prescription.status?.name() == 'PENDING' ? 'badge-amber' : prescription.status?.name() == 'DISPENSED' ? 'badge-green' : 'badge-red'}"
+                              th:text="${prescription.status?.name() == 'PENDING' ? 'Chờ cấp phát' : prescription.status?.name() == 'DISPENSED' ? 'Đã cấp phát' : 'Đã hủy'}"></span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#6b7280;">Ngày tạo:</span>
+                        <span th:text="${prescription.createdAt != null ? #temporals.format(prescription.createdAt, 'dd/MM/yyyy HH:mm') : '-'}"></span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:#6b7280;">Ngày cấp:</span>
+                        <span th:text="${prescription.dispensedAt != null ? #temporals.format(prescription.dispensedAt, 'dd/MM/yyyy') : 'Chưa cấp'}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ghi chú -->
+        <div th:if="${prescription.note != null}" class="card" style="padding:16px;margin-bottom:14px;">
+            <div class="section-title" style="margin-bottom:8px;">Ghi chú</div>
+            <div style="font-size:13px;color:#374151;" th:text="${prescription.note}"></div>
+        </div>
+
+        <!-- Danh sách thuốc -->
+        <div class="card" style="margin-bottom:14px;">
+            <div style="padding:14px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-size:13px;font-weight:500;">Danh sách thuốc</div>
+                <div style="font-size:12px;color:#6b7280;" th:text="${#lists.size(prescription.details)} + ' loại thuốc'"></div>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Tên thuốc</th>
+                    <th>Thành phần</th>
+                    <th>Đơn vị</th>
+                    <th>Số lượng</th>
+                    <th>Liều dùng</th>
+                    <th>Hướng dẫn</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="detail, iter : ${prescription.details}">
+                    <td style="font-size:12px;color:#6b7280;" th:text="${iter.count}"></td>
+                    <td style="font-weight:500;font-size:13px;" th:text="${detail.medicine?.name ?: '-'}"></td>
+                    <td style="font-size:12px;" th:text="${detail.medicine?.ingredient ?: '-'}"></td>
+                    <td style="font-size:12px;" th:text="${detail.medicine?.unit ?: '-'}"></td>
+                    <td style="font-size:12px;" th:text="${detail.quantity ?: '-'}"></td>
+                    <td style="font-size:12px;" th:text="${detail.dosage ?: '-'}"></td>
+                    <td style="font-size:12px;" th:text="${detail.instruction ?: '-'}"></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(prescription.details)}">
+                    <td colspan="7" style="text-align:center;padding:30px;color:#9ca3af;">Không có thuốc nào</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Cập nhật trạng thái -->
+        <div class="card" style="padding:16px;">
+            <div class="section-title" style="margin-bottom:12px;">Cập nhật trạng thái đơn thuốc</div>
+            <form th:action="@{'/admin/prescriptions/' + ${prescription.id} + '/status'}" method="post"
+                  style="display:flex;gap:10px;align-items:center;">
+                <select name="status" style="padding:7px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;background:white;outline:none;">
+                    <option value="PENDING" th:selected="${prescription.status?.name() == 'PENDING'}">Chờ cấp phát</option>
+                    <option value="DISPENSED" th:selected="${prescription.status?.name() == 'DISPENSED'}">Đã cấp phát</option>
+                    <option value="CANCELLED" th:selected="${prescription.status?.name() == 'CANCELLED'}">Đã hủy</option>
+                </select>
+                <button type="submit" class="btn-sm btn-primary"
+                        onclick="return confirm('Xác nhận cập nhật trạng thái?')">
+                    <i class="ti ti-device-floppy"></i> Cập nhật
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

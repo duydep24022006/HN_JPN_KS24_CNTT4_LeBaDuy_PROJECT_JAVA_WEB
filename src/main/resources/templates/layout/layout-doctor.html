@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar(profile)" class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">✚</div>
+        <div>
+            <div class="logo-text">Smart Healthcare</div>
+            <div class="logo-sub">Cổng bác sĩ</div>
+        </div>
+    </div>
+    <div class="sidebar-user">
+        <div class="user-avatar"
+             th:text="${profile?.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'D'}">D</div>
+        <div>
+            <div class="user-name" th:text="${profile?.fullName ?: 'Bác sĩ'}">Bác sĩ</div>
+            <span class="user-role">Bác sĩ</span>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-title">Chính</div>
+        <a th:href="@{/doctor/dashboard}" class="nav-item"
+           th:classappend="${currentUri != null and currentUri.contains('/dashboard')} ? ' active' : ''">
+            <div class="nav-icon">🏠</div> Tổng quan
+        </a>
+        <a th:href="@{/doctor/appointments}" class="nav-item"
+           th:classappend="${currentUri != null and currentUri.contains('/appointments') and !currentUri.contains('/detail')} ? ' active' : ''">
+            <div class="nav-icon">📅</div> Lịch hẹn bệnh nhân
+        </a>
+        <a th:href="@{/doctor/medical-records}" class="nav-item"
+           th:classappend="${currentUri != null and currentUri.contains('/medical-records')} ? ' active' : ''">
+            <div class="nav-icon">📋</div> Hồ sơ bệnh án
+        </a>
+        <div class="nav-section-title">Tài khoản</div>
+        <a th:href="@{/doctor/profile}" class="nav-item"
+           th:classappend="${currentUri != null and currentUri.contains('/profile')} ? ' active' : ''">
+            <div class="nav-icon">👤</div> Hồ sơ cá nhân
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <a th:href="@{/logout}" class="nav-item">
+            <div class="nav-icon">🚪</div> Đăng xuất
+        </a>
+    </div>
+</aside>
+</body>
+</html>
