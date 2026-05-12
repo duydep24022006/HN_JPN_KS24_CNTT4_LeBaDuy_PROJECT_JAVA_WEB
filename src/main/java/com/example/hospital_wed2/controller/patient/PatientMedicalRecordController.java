@@ -1,9 +1,7 @@
 package com.example.hospital_wed2.controller.patient;
 
-import com.example.hospital_wed2.entity.User;
-import com.example.hospital_wed2.repository.MedicalRecordRepository;
-import com.example.hospital_wed2.repository.UserRepository;
-import com.example.hospital_wed2.service.profile.ProfileService;
+import com.example.hospital_wed2.service.patient.PatientMedicalRecordService;
+import com.example.hospital_wed2.service.patient.PatientProfileService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -17,20 +15,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class PatientMedicalRecordController {
 
-    private final MedicalRecordRepository medicalRecordRepository;
-    private final UserRepository userRepository;
-    private final ProfileService profileService;
+    private final PatientMedicalRecordService patientMedicalRecordService;
+    private final PatientProfileService patientProfileService;
 
     @GetMapping
     public String listRecords(Model model, Authentication auth, HttpServletRequest request) {
-        User patient = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        String email = auth.getName();
 
-        var records = medicalRecordRepository.findByPatientWithDetails(patient);
-        model.addAttribute("profile", profileService.getMyProfile(auth.getName()));
-        model.addAttribute("records", records);
-        model.addAttribute("totalRecords", records.size());
+        model.addAttribute("profile", patientProfileService.getMyProfile(email));
+        model.addAttribute("records", patientMedicalRecordService.getMyMedicalRecords(email));
         model.addAttribute("currentUri", request.getRequestURI());
+
         return "patient/medical-records";
     }
 }

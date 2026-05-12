@@ -76,7 +76,7 @@ public class AuthService {
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Email hoặc mật khẩu không đúng"));
 
-        if (!user.getActive()) {                    // ← SỬA TẠI ĐÂY
+        if (!user.getActive()) {
             throw new IllegalArgumentException("Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên");
         }
 

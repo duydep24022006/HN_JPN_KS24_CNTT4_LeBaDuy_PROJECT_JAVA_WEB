@@ -16,17 +16,15 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-    // BUG-03: Đọc từ config thay vì hardcode Windows path
     @Value("${app.upload.dir}")
     private String uploadDirPath;
 
     private Path uploadDir;
 
-    // BUG-04: Chỉ cho phép các loại ảnh
     private static final List<String> ALLOWED_CONTENT_TYPES = List.of(
             "image/jpeg", "image/png", "image/webp", "image/gif"
     );
-    private static final long MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+    private static final long MAX_FILE_SIZE = 2 * 1024 * 1024;
 
     @PostConstruct
     public void init() {

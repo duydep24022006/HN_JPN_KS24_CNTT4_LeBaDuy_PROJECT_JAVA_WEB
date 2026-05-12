@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hồ sơ bác sĩ | Smart Healthcare</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#1e40af;--primary-dark:#1340a8;--primary-light:#dbeafe;
+  --doctor:#0d9488;--doctor-dark:#0f766e;--doctor-light:#ccfbf1;
+  --accent:#10b981;--accent-light:#d1fae5;
+  --warning:#f59e0b;--warning-light:#fef3c7;
+  --danger:#ef4444;--danger-light:#fee2e2;
+  --text:#1f2937;--sub:#64748b;--border:#e5e7eb;--bg:#f8fafc;--white:#fff;
+  --sw:260px;--r:14px
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);display:flex;min-height:100vh;color:var(--text)}
+.sidebar{width:var(--sw);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;box-shadow:2px 0 12px rgba(0,0,0,.06)}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--doctor),var(--doctor-dark));border-radius:10px;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.logo-text{font-size:14px;font-weight:800;color:var(--text);line-height:1.2}.logo-sub{font-size:11px;color:var(--sub)}
+.sidebar-user{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);background:#f0fdfa}
+.user-avatar{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--doctor),var(--doctor-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.user-name{font-size:13px;font-weight:700}
+.user-role{display:inline-block;font-size:10px;background:var(--doctor-light);color:var(--doctor-dark);padding:2px 8px;border-radius:20px;font-weight:600;margin-top:2px}
+.sidebar-nav{flex:1;padding:12px 12px 0;overflow-y:auto}
+.nav-section-title{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;padding:12px 10px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--sub);font-size:13.5px;font-weight:500;text-decoration:none;transition:.15s;margin-bottom:2px}
+.nav-item:hover{background:#f0fdfa;color:var(--doctor)}.nav-item.active{background:var(--doctor-light);color:var(--doctor-dark);font-weight:700}
+.nav-icon{width:20px;text-align:center;font-size:16px;flex-shrink:0}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+
+.main{flex:1;margin-left:var(--sw);display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar h1{font-size:17px;font-weight:800}.topbar p{font-size:12px;color:var(--sub);margin-top:2px}
+.content{padding:24px 28px;flex:1}
+
+/* ── Profile layout ── */
+.profile-grid{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start}
+
+/* ── Profile card (left) ── */
+.profile-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden;position:sticky;top:78px}
+.profile-cover{background:linear-gradient(135deg,var(--doctor) 0%,var(--doctor-dark) 100%);height:80px;position:relative}
+.profile-cover::after{content:'🩺';position:absolute;right:20px;bottom:-8px;font-size:52px;opacity:.2}
+.profile-avatar-wrap{padding:0 20px;position:relative;margin-top:-36px;margin-bottom:12px}
+.profile-avatar{width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#fff,#e0fdfa);border:3px solid var(--white);box-shadow:0 4px 12px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:var(--doctor-dark)}
+.profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:15px}
+.profile-name{font-size:17px;font-weight:800;padding:0 20px;line-height:1.2}
+.profile-specialty{display:inline-block;font-size:11px;background:var(--doctor-light);color:var(--doctor-dark);padding:3px 10px;border-radius:20px;font-weight:700;margin:6px 20px 0}
+.profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--border);margin-top:16px}
+.pstat{text-align:center;padding:14px 10px;border-right:1px solid var(--border)}
+.pstat:last-child{border-right:none}
+.pstat-val{font-size:18px;font-weight:800;color:var(--doctor-dark)}
+.pstat-label{font-size:10px;color:var(--sub);margin-top:2px;font-weight:600;text-transform:uppercase}
+
+/* ── Right form area ── */
+.tabs{display:flex;gap:4px;background:#f1f5f9;border-radius:12px;padding:4px;margin-bottom:20px}
+.tab{flex:1;text-align:center;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;color:var(--sub);transition:.15s;border:none;background:transparent;font-family:inherit}
+.tab.active{background:var(--white);color:var(--doctor-dark);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+.card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:20px}
+.card-header{padding:18px 20px 0;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.card-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ci-teal{background:var(--doctor-light)}.ci-blue{background:var(--primary-light)}.ci-red{background:var(--danger-light)}
+.card-title{font-size:15px;font-weight:700}
+.card-sub{font-size:12px;color:var(--sub);margin-top:2px}
+.card-body{padding:0 20px 20px}
+
+/* ── Form ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{margin-bottom:16px}
+.form-group:last-child{margin-bottom:0}
+label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+label .req{color:var(--danger);margin-left:2px}
+input[type=text],input[type=email],input[type=number],input[type=password],select,textarea{
+  width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;
+  font-family:inherit;font-size:13.5px;color:var(--text);background:var(--white);
+  transition:.15s;outline:none
+}
+input:focus,select:focus,textarea:focus{border-color:var(--doctor);box-shadow:0 0 0 3px rgba(13,148,136,.1)}
+input[readonly],input[disabled]{background:#f9fafb;color:var(--sub);cursor:not-allowed}
+textarea{resize:vertical;min-height:90px}
+.input-prefix{position:relative}
+.input-prefix span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:13px;pointer-events:none}
+.input-prefix input{padding-left:36px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:.15s;text-decoration:none}
+.btn-submit{background:var(--doctor);color:#fff}.btn-submit:hover{background:var(--doctor-dark)}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--sub)}.btn-outline:hover{border-color:var(--doctor);color:var(--doctor)}
+.btn-danger-sm{background:var(--danger-light);color:var(--danger);font-size:13px;padding:9px 18px}.btn-danger-sm:hover{background:#fecaca}
+.form-footer{display:flex;justify-content:flex-end;gap:10px;padding-top:8px;margin-top:4px;border-top:1px solid var(--border)}
+
+/* Avatar upload */
+.avatar-upload{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:#f9fafb;border-radius:12px;border:1.5px dashed var(--border)}
+.av-preview{width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,var(--doctor),var(--doctor-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0;overflow:hidden}
+.av-preview img{width:100%;height:100%;object-fit:cover}
+.av-info label{font-size:13px;font-weight:700;color:var(--text);display:block;margin-bottom:4px}
+.av-info p{font-size:11.5px;color:var(--sub)}
+.file-input{margin-top:8px;font-size:12px;color:var(--sub)}
+
+.alert-success{background:var(--accent-light);color:#065f46;border:1px solid #6ee7b7;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;display:flex;align-items:center;gap:8px}
+.alert-error{background:var(--danger-light);color:#991b1b;border:1px solid #fca5a5;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px}
+
+.info-badge{display:inline-flex;align-items:center;gap:6px;background:#f9fafb;border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--sub);margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<div th:replace="~{layout/layout-doctor :: sidebar(${profile})}"></div>
+
+<main class="main">
+
+    <div class="topbar">
+        <div>
+            <h1>Hồ sơ cá nhân</h1>
+            <p>Quản lý thông tin và tài khoản của bạn</p>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <div th:if="${successMessage}" class="alert-success">
+            <span th:text="${successMessage}"></span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert-error">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <div class="profile-grid">
+
+            <!-- LEFT -->
+            <div>
+
+                <div class="profile-card">
+
+                    <div class="profile-cover"></div>
+
+                    <div class="profile-avatar-wrap">
+                        <div class="profile-avatar">
+
+                            <img th:if="${profile?.avatarUrl != null and profile?.avatarUrl != ''}"
+                                 th:src="@{'/uploads/' + ${profile.avatarUrl}}"
+                                 alt="Avatar"/>
+
+                            <span th:if="${profile?.avatarUrl == null or profile?.avatarUrl == ''}"
+                                  th:text="${profile?.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'D'}">
+                            D
+                        </span>
+
+                        </div>
+                    </div>
+
+                    <div class="profile-name"
+                         th:text="${'BS. ' + (profile?.fullName ?: 'Bác sĩ')}">
+                    </div>
+
+                    <div class="profile-specialty"
+                         th:text="${profile?.specialtyName ?: 'Chuyên khoa'}">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT -->
+            <div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('info', this)" type="button">
+                        📋 Thông tin chuyên môn
+                    </button>
+
+                    <button class="tab" onclick="switchTab('account', this)" type="button">
+                        👤 Tài khoản
+                    </button>
+
+                    <button class="tab" onclick="switchTab('password', this)" type="button">
+                        🔒 Đổi mật khẩu
+                    </button>
+                </div>
+
+                <!-- TAB INFO -->
+                <div id="tab-info" class="tab-panel active">
+
+                    <form th:action="@{/doctor/profile/update}"
+                          th:object="${profile}"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        <!-- CSRF -->
+                        <input type="hidden"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}">
+
+                        <!-- specialty -->
+                        <input type="hidden"
+                               th:field="*{specialtyId}"/>
+
+                        <div class="card">
+
+                            <div class="card-header">
+                                <div class="card-icon ci-teal">🖼️</div>
+
+                                <div>
+                                    <div class="card-title">Ảnh đại diện</div>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+
+                                <div class="avatar-upload">
+
+                                    <div class="av-preview">
+
+                                        <img th:if="${profile?.avatarUrl != null and profile?.avatarUrl != ''}"
+                                             th:src="@{'/uploads/' + ${profile.avatarUrl}}"
+                                             alt="Avatar"/>
+
+                                        <span th:if="${profile?.avatarUrl == null or profile?.avatarUrl == ''}"
+                                              th:text="${profile?.fullName != null ? profile.fullName.substring(0,1).toUpperCase() : 'D'}">
+                                        D
+                                    </span>
+
+                                    </div>
+
+                                    <div>
+                                        <label>Chọn ảnh mới</label>
+
+                                        <p style="font-size:12px;color:#64748b;margin-top:4px">
+                                            JPG, PNG, tối đa 2MB
+                                        </p>
+
+                                        <input type="file"
+                                               name="avatarFile"
+                                               accept="image/*"
+                                               style="margin-top:10px"/>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="card">
+
+                            <div class="card-header">
+                                <div class="card-icon ci-teal">🩺</div>
+
+                                <div>
+                                    <div class="card-title">Thông tin chuyên môn</div>
+                                    <div class="card-sub">
+                                        Cập nhật hồ sơ bác sĩ của bạn
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+
+                                <div class="form-row">
+
+                                    <div class="form-group">
+                                        <label>
+                                            Họ và tên
+                                            <span class="req">*</span>
+                                        </label>
+
+                                        <input type="text"
+                                               th:field="*{fullName}"/>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Số giấy phép hành nghề</label>
+
+                                        <input type="text"
+                                               th:field="*{licenseNumber}"/>
+                                    </div>
+
+                                </div>
+
+                                <div class="form-row">
+
+                                    <div class="form-group">
+                                        <label>Số năm kinh nghiệm</label>
+
+                                        <input type="number"
+                                               th:field="*{experienceYears}"/>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Phí khám</label>
+
+                                        <div class="input-prefix">
+                                            <span>₫</span>
+
+                                            <input type="number"
+                                                   th:field="*{consultationFee}"/>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="form-group">
+
+                                    <label>Mô tả</label>
+
+                                    <textarea th:field="*{description}"></textarea>
+
+                                </div>
+
+                                <div class="form-footer">
+
+                                    <button type="submit"
+                                            class="btn btn-submit">
+                                        💾 Lưu thay đổi
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+                <!-- TAB PASSWORD -->
+                <div id="tab-password" class="tab-panel">
+
+                    <div class="card">
+
+                        <div class="card-header">
+                            <div class="card-icon ci-red">🔒</div>
+
+                            <div>
+                                <div class="card-title">Đổi mật khẩu</div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+
+                            <form th:action="@{/doctor/profile/change-password}"
+                                  method="post">
+
+                                <!-- CSRF -->
+                                <input type="hidden"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}">
+
+                                <div class="form-group">
+
+                                    <label>Mật khẩu hiện tại</label>
+
+                                    <input type="password"
+                                           name="currentPassword"
+                                           required/>
+
+                                </div>
+
+                                <div class="form-group">
+
+                                    <label>Mật khẩu mới</label>
+
+                                    <input type="password"
+                                           name="newPassword"
+                                           required/>
+
+                                </div>
+
+                                <div class="form-group">
+
+                                    <label>Xác nhận mật khẩu</label>
+
+                                    <input type="password"
+                                           name="confirmPassword"
+                                           required/>
+
+                                </div>
+
+                                <div class="form-footer">
+
+                                    <button type="submit"
+                                            class="btn btn-submit">
+                                        🔒 Đổi mật khẩu
+                                    </button>
+
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<script>
+    function switchTab(id, btn) {
+
+        document.querySelectorAll('.tab-panel')
+            .forEach(p => p.classList.remove('active'));
+
+        document.querySelectorAll('.tab')
+            .forEach(b => b.classList.remove('active'));
+
+        document.getElementById('tab-' + id)
+            .classList.add('active');
+
+        btn.classList.add('active');
+    }
+</script>
+
+</body>
+</html>

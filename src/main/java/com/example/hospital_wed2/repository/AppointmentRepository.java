@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.awt.print.Pageable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByPatientWithDetails(
             @Param("patient") User patient
     );
+
 
 
 
@@ -86,7 +88,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     */
     boolean existsByDoctorIdAndAppointmentDateAndAppointmentTimeAndStatus(
             Long doctorId,
-            java.time.LocalDate appointmentDate,
+            LocalDate appointmentDate,
             java.time.LocalTime appointmentTime,
             AppointmentStatus status
     );
@@ -228,6 +230,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
      Tìm lịch hẹn theo id và bác sĩ
      Đảm bảo bác sĩ chỉ xem lịch của mình
     */
+
     @Query("""
         SELECT a
         FROM Appointment a
@@ -253,7 +256,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         WHERE a.appointmentDate = :date
     """)
     long countByDate(
-            @Param("date") java.time.LocalDate date
+            @Param("date") LocalDate date
     );
 
 
@@ -274,7 +277,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     """)
     List<java.time.LocalTime> findBookedSlots(
             @Param("doctorId") Long doctorId,
-            @Param("date") java.time.LocalDate date
+            @Param("date") LocalDate date
     );
 
 
@@ -292,4 +295,62 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         LIMIT 5
     """)
     List<Appointment> findTop5ByOrderByCreatedAtDesc();
+    // ==================== COUNT FOR PATIENT DASHBOARD ====================
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.patient = :patient")
+    long countByPatient(@Param("patient") User patient);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.patient = :patient AND a.status = :status")
+    long countByPatientAndStatus(@Param("patient") User patient,
+                                 @Param("status") AppointmentStatus status);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.patient = :patient " +
+            "AND a.appointmentDate >= :today AND a.status IN (:pending, :confirmed)")
+    long countUpcomingAppointments(@Param("patient") User patient,
+                                   @Param("today") LocalDate today,
+                                   @Param("pending") AppointmentStatus pending,
+                                   @Param("confirmed") AppointmentStatus confirmed);
+
+    // ====================== DOCTOR METHODS (THÊM VÀO CUỐI FILE) ======================
+
+    /**
+     * Lấy tất cả lịch hẹn của bác sĩ, sắp xếp theo ngày mới nhất
+     */
+    List<Appointment> findByDoctorOrderByAppointmentDateDesc(Doctor doctor);
+
+
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.appointmentDate = :date")
+    long countByAppointmentDate(@Param("date") LocalDate date);
+
+    @Query(value = """
+    SELECT *
+    FROM appointments a
+    WHERE a.patient_id = :patientId
+    AND a.status = :status
+    ORDER BY a.appointment_date ASC, a.appointment_time ASC
+    LIMIT 5
+    """, nativeQuery = true)
+    List<Appointment> findTopAppointmentsByPatientAndStatus(
+            @Param("patientId") Long patientId,
+            @Param("status") String status
+    );
+
+    @Query("""
+    SELECT d.user.profile.fullName, COUNT(a.id)
+    FROM Appointment a
+    JOIN a.doctor d
+    WHERE a.status = com.example.hospital_wed2.entity.AppointmentStatus.COMPLETED
+    GROUP BY d.id, d.user.profile.fullName
+    ORDER BY COUNT(a.id) DESC
+""")
+    List<Object[]> findTopDoctorsByCompletedAppointments();
+
+    @Query("""
+    SELECT MONTH(a.appointmentDate), COUNT(a.id)
+    FROM Appointment a
+    GROUP BY MONTH(a.appointmentDate)
+    ORDER BY MONTH(a.appointmentDate)
+""")
+    List<Object[]> countAppointmentsByMonth();
 }

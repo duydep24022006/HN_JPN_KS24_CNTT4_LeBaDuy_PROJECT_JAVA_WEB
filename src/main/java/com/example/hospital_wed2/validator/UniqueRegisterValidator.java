@@ -35,7 +35,6 @@ public class UniqueRegisterValidator implements ConstraintValidator<UniqueRegist
             valid = false;
         }
 
-        // BUG-13: Kiểm tra confirmPassword khớp với password
         if (dto.getPassword() != null && dto.getConfirmPassword() != null
                 && !dto.getPassword().equals(dto.getConfirmPassword())) {
             context.buildConstraintViolationWithTemplate("Mật khẩu xác nhận không khớp")

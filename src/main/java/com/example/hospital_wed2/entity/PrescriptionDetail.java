@@ -3,8 +3,6 @@ package com.example.hospital_wed2.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(
         name = "prescription_details",

@@ -1,15 +1,14 @@
 package com.example.hospital_wed2.controller.patient;
 
-import com.example.hospital_wed2.dto.profile.ChangePasswordRequest;
-import com.example.hospital_wed2.dto.profile.UpdateProfileRequest;
-import com.example.hospital_wed2.dto.profile.UserProfileResponse;
+import com.example.hospital_wed2.dto.profile.shared.ChangePasswordRequest;
+import com.example.hospital_wed2.dto.profile.shared.UpdateProfileRequest;
+import com.example.hospital_wed2.dto.profile.shared.UserProfileResponse;
+import com.example.hospital_wed2.service.patient.PatientProfileService;
 import com.example.hospital_wed2.service.FileStorageService;
-import com.example.hospital_wed2.service.profile.ProfileService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,54 +21,98 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class PatientProfileController {
 
-    private final ProfileService profileService;
+    private final PatientProfileService patientProfileService;
     private final FileStorageService fileStorageService;
 
     @GetMapping
-    public String getMyProfile(@RequestParam(required = false) Boolean edit, Model model , HttpServletRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserProfileResponse profile = profileService.getMyProfile(auth.getName());
+    public String getMyProfile(
+            @RequestParam(required = false) Boolean edit,
+            Model model,
+            HttpServletRequest request,
+            Authentication auth) {
+
+        String email = auth.getName();
+        UserProfileResponse profile = patientProfileService.getMyProfile(email);
+
         model.addAttribute("profile", profile);
+        model.addAttribute("updateRequest", convertToUpdateRequest(profile)); // để bind form
+        model.addAttribute("changePasswordRequest", new ChangePasswordRequest());
         model.addAttribute("editMode", edit != null && edit);
         model.addAttribute("currentUri", request.getRequestURI());
+
         return "patient/profile";
     }
 
     @PostMapping("/update")
     public String updateMyProfile(
-            @Valid @ModelAttribute("profile") UpdateProfileRequest request,
+            @Valid @ModelAttribute("updateRequest") UpdateProfileRequest request,
             BindingResult bindingResult,
             @RequestParam(required = false) MultipartFile avatarFile,
-            Model model, RedirectAttributes ra) {
+            Model model,
+            RedirectAttributes ra,
+            Authentication auth) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
+        String email = auth.getName();
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("profile", profileService.getMyProfile(username));
+            model.addAttribute("profile", patientProfileService.getMyProfile(email));
             model.addAttribute("editMode", true);
             return "patient/profile";
         }
+
+        // Upload avatar nếu có
         if (avatarFile != null && !avatarFile.isEmpty()) {
-            request.setAvatarUrl(fileStorageService.storeFile(avatarFile));
+            try {
+                String fileName = fileStorageService.storeFile(avatarFile);
+                request.setAvatarUrl(fileName);
+            } catch (Exception e) {
+                ra.addFlashAttribute("errorMessage", "Upload ảnh thất bại: " + e.getMessage());
+                return "redirect:/patient/profile?edit=true";
+            }
         }
-        profileService.updateMyProfile(username, request);
-        ra.addFlashAttribute("successMessage", "Cập nhật hồ sơ thành công!");
+
+        try {
+            patientProfileService.updateMyProfile(email, request);
+            ra.addFlashAttribute("successMessage", "Cập nhật hồ sơ thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
         return "redirect:/patient/profile";
     }
 
     @PostMapping("/change-password")
     public String changePassword(
-            @ModelAttribute ChangePasswordRequest request,
-            RedirectAttributes ra) {
+            @Valid @ModelAttribute ChangePasswordRequest request,
+            BindingResult bindingResult,
+            RedirectAttributes ra,
+            Authentication auth) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (bindingResult.hasErrors()) {
+            ra.addFlashAttribute("passwordError", "Dữ liệu mật khẩu không hợp lệ");
+            return "redirect:/patient/profile";
+        }
+
         try {
-            profileService.changePassword(auth.getName(), request);
+            patientProfileService.changePassword(auth.getName(), request);
             ra.addFlashAttribute("successMessage", "Đổi mật khẩu thành công!");
         } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", e.getMessage());
+            ra.addFlashAttribute("passwordError", e.getMessage());
         }
+
         return "redirect:/patient/profile";
+    }
+
+    // Helper chuyển Response → Request để bind form
+    private UpdateProfileRequest convertToUpdateRequest(UserProfileResponse profile) {
+        UpdateProfileRequest req = new UpdateProfileRequest();
+        req.setFullName(profile.getFullName());
+        req.setPhoneNumber(profile.getPhoneNumber());
+        req.setDateOfBirth(profile.getDateOfBirth());
+        req.setGender(profile.getGender());
+        req.setAddress(profile.getAddress());
+        req.setIdentityCard(profile.getIdentityCard());
+        req.setAvatarUrl(profile.getAvatarUrl());
+        return req;
     }
 }

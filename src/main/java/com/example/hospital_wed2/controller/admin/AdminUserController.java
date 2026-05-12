@@ -1,8 +1,9 @@
 package com.example.hospital_wed2.controller.admin;
 
+import com.example.hospital_wed2.dto.admin.AdminUserDto;
 import com.example.hospital_wed2.entity.Role;
-import com.example.hospital_wed2.entity.User;
-import com.example.hospital_wed2.repository.UserRepository;
+import com.example.hospital_wed2.service.admin.AdminUserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,35 +11,23 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Controller
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
 public class AdminUserController {
 
-    private final UserRepository userRepository;
-
-    // ================= LIST + SEARCH =================
+    private final AdminUserService userService;
 
     @GetMapping
     public String listUsers(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Role role,
             @RequestParam(required = false) Boolean active,
-            Model model
-    ) {
-        boolean hasFilter = (keyword != null && !keyword.isBlank()) || role != null || active != null;
+            Model model,
+            HttpServletRequest request) {
 
-        List<User> users;
-        if (hasFilter) {
-            String kw = (keyword != null && !keyword.isBlank()) ? keyword : null;
-            users = userRepository.searchUsers(role, active, kw);
-        } else {
-            users = userRepository.findAllWithProfile();
-        }
-
-        model.addAttribute("users", users);
+        model.addAttribute("users", userService.searchUsers(keyword, role, active));
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedRole", role);
         model.addAttribute("selectedActive", active);
@@ -46,20 +35,36 @@ public class AdminUserController {
                 Arrays.stream(Role.values())
                         .filter(r -> r != Role.ADMIN)
                         .toList());
+        model.addAttribute("currentUri", request.getRequestURI());
 
         return "admin/users";
     }
 
-    // ================= TOGGLE ACTIVE =================
+    @GetMapping("/{id}")
+    public String viewUser(@PathVariable Long id, Model model) {
+        model.addAttribute("user", userService.getUserById(id));
+        return "admin/user-detail";
+    }
 
-    @PostMapping("/toggle/{id}")
-    public String toggleActive(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
-        user.setActive(!user.getActive());
-        userRepository.save(user);
-        redirectAttributes.addFlashAttribute("successMessage",
-                user.getActive() ? "Đã kích hoạt tài khoản" : "Đã vô hiệu hóa tài khoản");
+    @PostMapping({"/{id}/toggle", "/toggle/{id}"})
+    public String toggleStatus(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+            userService.toggleUserStatus(id);
+            ra.addFlashAttribute("successMessage", "Đã thay đổi trạng thái tài khoản");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping({"/{id}/delete", "/delete/{id}"})
+    public String deleteUser(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+            userService.deleteUser(id);
+            ra.addFlashAttribute("successMessage", "Đã vô hiệu hóa tài khoản");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
         return "redirect:/admin/users";
     }
 }

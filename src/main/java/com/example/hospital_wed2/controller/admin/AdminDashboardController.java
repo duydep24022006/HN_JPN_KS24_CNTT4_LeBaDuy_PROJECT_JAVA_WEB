@@ -1,61 +1,42 @@
 package com.example.hospital_wed2.controller.admin;
 
-import com.example.hospital_wed2.entity.PrescriptionStatus;
-import com.example.hospital_wed2.repository.AppointmentRepository;
-import com.example.hospital_wed2.repository.DoctorRepository;
-import com.example.hospital_wed2.repository.PrescriptionRepository;
-import com.example.hospital_wed2.repository.UserRepository;
+import com.example.hospital_wed2.dto.admin.AdminDashboardStats;
+import com.example.hospital_wed2.service.admin.AdminDashboardService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import java.time.LocalDate;
 
 @Controller
-@RequestMapping({"/admin/dashboard","/admin/"})
+@RequestMapping({"/admin/dashboard", "/admin/"})
+@RequiredArgsConstructor
 public class AdminDashboardController {
 
-    private final UserRepository userRepository;
-    private final DoctorRepository doctorRepository;
-    private final AppointmentRepository appointmentRepository;
-    private final PrescriptionRepository prescriptionRepository;
-
-    public AdminDashboardController(UserRepository userRepository,
-                                    DoctorRepository doctorRepository,
-                                    AppointmentRepository appointmentRepository,
-                                    PrescriptionRepository prescriptionRepository) {
-        this.userRepository = userRepository;
-        this.doctorRepository = doctorRepository;
-        this.appointmentRepository = appointmentRepository;
-        this.prescriptionRepository = prescriptionRepository;
-    }
+    private final AdminDashboardService dashboardService;
 
     @GetMapping
     public String dashboard(Model model, HttpServletRequest request) {
-        long totalUsers = userRepository.count();
-        long totalDoctors = doctorRepository.count();
+        AdminDashboardStats stats = dashboardService.getDashboardStats();
 
-        // BUG-08: Dùng query database thay vì findAll() + stream filter
-        long todayAppointments = appointmentRepository.countByDate(LocalDate.now());
-        long pendingPrescriptions = prescriptionRepository.countByStatus(PrescriptionStatus.PENDING);
+        model.addAttribute("stats", stats);
+        model.addAttribute("totalUsers", stats.getTotalUsers());
+        model.addAttribute("totalDoctors", stats.getTotalDoctors());
+        model.addAttribute("todayAppointments", stats.getTodayAppointments());
+        model.addAttribute("pendingPrescriptions", stats.getPendingPrescriptions());
 
-        var recentAppointments = appointmentRepository.findTop5ByOrderByCreatedAtDesc();
-        var recentPrescriptions = prescriptionRepository.findTop5ByOrderByCreatedAtDesc();
-        var recentUsers = userRepository.findTop5ByOrderByCreatedAtDesc();
+        model.addAttribute("recentAppointments", dashboardService.getRecentAppointments());
+        model.addAttribute("recentPrescriptions", dashboardService.getRecentPrescriptions());
+        model.addAttribute("recentUsers", dashboardService.getRecentUsers());
 
-        model.addAttribute("totalUsers", totalUsers);
-        model.addAttribute("totalDoctors", totalDoctors);
-        model.addAttribute("todayAppointments", todayAppointments);
-        model.addAttribute("pendingPrescriptions", pendingPrescriptions);
-        model.addAttribute("recentAppointments", recentAppointments);
-        model.addAttribute("recentPrescriptions", recentPrescriptions);
-        model.addAttribute("recentUsers", recentUsers);
-        model.addAttribute("currentDate", java.time.LocalDate.now().format(
-            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        model.addAttribute("currentUri",
-                request.getRequestURI());
+        model.addAttribute("topDoctors", dashboardService.getTopDoctors());
+        model.addAttribute("topMedicines", dashboardService.getTopMedicines());
+        model.addAttribute("monthlyAppointments", dashboardService.getMonthlyAppointments());
+
+        model.addAttribute("currentDate", LocalDate.now().toString());
+        model.addAttribute("currentUri", request.getRequestURI());
 
         return "admin/dashboard";
     }

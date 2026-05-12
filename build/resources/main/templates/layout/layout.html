@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+</head>
+
+<body>
+
+<div th:fragment="sidebar">
+
+    <div class="sidebar">
+
+        <div class="sidebar-logo">
+            <div class="logo-icon">+</div>
+
+            <div>
+                <div class="logo-text">Smart Healthcare</div>
+                <div class="logo-sub">Quản trị hệ thống</div>
+            </div>
+        </div>
+
+        <!-- ================= TỔNG QUAN ================= -->
+
+        <div class="nav-section">
+
+            <div class="nav-label">Tổng quan</div>
+
+            <a class="nav-item"
+               th:href="@{/admin/dashboard}"
+               th:classappend="${currentUri != null and currentUri.contains('/admin/dashboard')} ? ' active' : ''">
+
+                <i class="ti ti-layout-dashboard"></i>
+                Tổng quan
+            </a>
+
+        </div>
+
+        <!-- ================= QUẢN LÝ ================= -->
+
+        <div class="nav-section">
+
+            <div class="nav-label">Quản lý</div>
+
+            <a class="nav-item"
+               th:href="@{/admin/users}"
+               th:classappend="${currentUri != null and currentUri.contains('/admin/users')} ? ' active' : ''">
+
+                <i class="ti ti-users"></i>
+                Người dùng
+            </a>
+
+            <a class="nav-item"
+               th:href="@{/admin/doctors}"
+               th:classappend="${currentUri != null and currentUri.contains('/admin/doctors')} ? ' active' : ''">
+
+                <i class="ti ti-stethoscope"></i>
+                Bác sĩ
+            </a>
+
+            <a class="nav-item"
+               th:href="@{/admin/specialties}"
+               th:classappend="${currentUri != null and currentUri.contains('/admin/specialties')} ? ' active' : ''">
+
+                <i class="ti ti-heart-rate-monitor"></i>
+                Chuyên khoa
+            </a>
+
+            <a class="nav-item"
+               th:href="@{/admin/medicines}"
+               th:classappend="${currentUri != null and currentUri.contains('/admin/medicines')} ? ' active' : ''">
+
+                <i class="ti ti-pill"></i>
+                Danh mục thuốc
+            </a>
+
+            <a class="nav-item"
+               th:href="@{/admin/prescriptions}"
+               th:classappend="${currentUri != null and currentUri.contains('/admin/prescriptions')} ? ' active' : ''">
+
+                <i class="ti ti-file-text"></i>
+                Duyệt đơn thuốc
+            </a>
+
+        </div>
+
+        <!-- ================= CÀI ĐẶT ================= -->
+
+        <div class="nav-section">
+
+            <div class="nav-label">Cài đặt</div>
+
+            <a class="nav-item"
+               th:href="@{/admin/profile}"
+               th:classappend="${currentUri != null and currentUri.contains('/admin/profile')} ? ' active' : ''">
+
+                <i class="ti ti-user-circle"></i>
+                Hồ sơ cá nhân
+            </a>
+
+        </div>
+
+        <!-- ================= FOOTER ================= -->
+
+        <div class="sidebar-footer">
+
+            <div class="admin-info">
+
+                <div class="admin-avatar">AD</div>
+
+                <div>
+                    <div class="admin-name">Admin Hệ thống</div>
+                    <div class="admin-role">Quản trị viên</div>
+                </div>
+
+                <a th:href="@{/logout}"
+                   style="margin-left:auto;color:rgba(255,255,255,0.4);font-size:15px;text-decoration:none">
+
+                    <i class="ti ti-logout"></i>
+
+                </a>
+
+            </div>
+
+        </div>
+
+       
+    </div>
+
+</div>
+
+</body>
+</html>

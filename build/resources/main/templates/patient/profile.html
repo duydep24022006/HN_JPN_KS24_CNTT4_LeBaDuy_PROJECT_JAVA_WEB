@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hồ sơ | Smart Healthcare</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#1e40af;--primary-dark:#1340a8;--primary-light:#dbeafe;--accent:#10b981;--accent-light:#d1fae5;--warning:#f59e0b;--danger:#ef4444;--danger-light:#fee2e2;--text:#1f2937;--sub:#64748b;--border:#e5e7eb;--bg:#f8fafc;--white:#fff;--sw:260px;--r:14px}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);display:flex;min-height:100vh;color:var(--text)}
+.sidebar{width:var(--sw);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100;box-shadow:2px 0 12px rgba(0,0,0,.06)}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:10px;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.logo-text{font-size:14px;font-weight:800;line-height:1.2}.logo-sub{font-size:11px;color:var(--sub)}
+.sidebar-user{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);background:#f9fafb}
+.user-avatar{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#1e40af);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.user-name{font-size:13px;font-weight:700}
+.user-role{display:inline-block;font-size:10px;background:var(--primary-light);color:var(--primary);padding:2px 8px;border-radius:20px;font-weight:600;margin-top:2px}
+.sidebar-nav{flex:1;padding:12px 12px 0;overflow-y:auto}
+.nav-section-title{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;padding:12px 10px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--sub);font-size:13.5px;font-weight:500;text-decoration:none;transition:.15s;margin-bottom:2px}
+.nav-item:hover{background:#f0f4ff;color:var(--primary)}.nav-item.active{background:var(--primary-light);color:var(--primary);font-weight:700}
+.nav-icon{width:20px;text-align:center;font-size:16px;flex-shrink:0}.sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+.main{flex:1;margin-left:var(--sw);display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar h1{font-size:17px;font-weight:800}.topbar p{font-size:12px;color:var(--sub);margin-top:2px}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.content{padding:24px 28px;flex:1}
+.profile-layout{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start}
+.profile-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden;position:sticky;top:80px}
+.avatar-section{padding:28px 20px;text-align:center;border-bottom:1px solid var(--border)}
+.big-avatar{width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,#3b82f6,#1e40af);color:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;margin:0 auto 14px}
+.profile-name{font-size:17px;font-weight:800}
+.profile-email{font-size:12px;color:var(--sub);margin-top:4px}
+.profile-role{display:inline-block;font-size:11px;background:var(--primary-light);color:var(--primary);padding:3px 10px;border-radius:20px;font-weight:700;margin-top:8px}
+.info-list{padding:16px 20px}
+.info-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.info-item:last-child{border-bottom:none}
+.info-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.info-label{font-size:11px;color:var(--sub);margin-bottom:1px}
+.info-val{font-size:13px;font-weight:600}
+.main-section{display:flex;flex-direction:column;gap:20px}
+.card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border)}
+.card-head h2{font-size:15px;font-weight:800}
+.card-body{padding:20px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}
+.form-control{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--text);background:#f9fafb;outline:none;transition:.2s}
+.form-control:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(30,64,175,.1)}
+.form-control[readonly]{background:#f3f4f6;cursor:not-allowed}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:.15s;text-decoration:none}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--sub)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:var(--danger-light);color:var(--danger)}.btn-danger:hover{background:#fecaca}
+.alert-success{background:var(--accent-light);color:#065f46;border:1px solid #6ee7b7;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px}
+.alert-error{background:var(--danger-light);color:#991b1b;border:1px solid #fca5a5;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px}
+.gender-group{display:flex;gap:10px}
+.gender-btn{flex:1;padding:9px;border:1.5px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:600;color:var(--sub);transition:.2s}
+.gender-btn input[type=radio]{display:none}
+.gender-btn.selected,.gender-btn:has(input:checked){border-color:var(--primary);background:var(--primary-light);color:var(--primary)}
+</style>
+</head>
+<body>
+<div th:replace="~{layout/layout-patient :: sidebar(${profile})}"></div>
+<main class="main">
+<div class="topbar">
+    <div><h1>Hồ sơ cá nhân</h1><p>Quản lý thông tin tài khoản của bạn</p></div>
+    <div class="topbar-actions">
+        <a th:if="${!editMode}" th:href="@{/patient/profile(edit=true)}" class="btn btn-primary">✏️ Chỉnh sửa</a>
+        <a th:if="${editMode}" th:href="@{/patient/profile}" class="btn btn-outline">✕ Hủy</a>
+    </div>
+</div>
+<div class="content">
+    <div th:if="${successMessage}" class="alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert-error" th:text="${errorMessage}"></div>
+
+    <div class="profile-layout">
+        <div class="profile-card">
+            <div class="avatar-section">
+                <div class="big-avatar">
+
+                    <img th:if="${profile != null and profile.avatarUrl != null}"
+                         th:src="@{'/uploads/' + ${profile.avatarUrl}}"
+                         alt="Avatar"
+                         style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+
+                    <span th:if="${profile == null or profile.avatarUrl == null}"
+                          th:text="${profile != null and profile.fullName != null
+                          ? profile.fullName.substring(0,1).toUpperCase()
+                          : 'P'}">
+                        P
+    </span>
+
+                </div>
+                <div class="profile-name" th:text="${profile?.fullName ?: '—'}">—</div>
+                <div class="profile-email" th:text="${profile?.email ?: '—'}">—</div>
+                <div class="profile-role">🏥 Bệnh nhân</div>
+            </div>
+            <div class="info-list">
+                <div class="info-item"><div class="info-icon">📞</div><div><div class="info-label">Điện thoại</div><div class="info-val" th:text="${profile?.phoneNumber ?: '—'}">—</div></div></div>
+                <div class="info-item"><div class="info-icon">🎂</div><div><div class="info-label">Ngày sinh</div><div class="info-val" th:text="${profile?.dateOfBirth != null ? #temporals.format(profile.dateOfBirth,'dd/MM/yyyy') : '—'}">—</div></div></div>
+                <div class="info-item"><div class="info-icon">👤</div><div><div class="info-label">Giới tính</div><div class="info-val" th:text="${profile?.gender != null ? (profile.gender.name() == 'MALE' ? 'Nam' : 'Nữ') : '—'}">—</div></div></div>
+                <div class="info-item"><div class="info-icon">🏠</div><div><div class="info-label">Địa chỉ</div><div class="info-val" th:text="${profile?.address ?: '—'}">—</div></div></div>
+                <div class="info-item"><div class="info-icon">🪪</div><div><div class="info-label">CCCD</div><div class="info-val" th:text="${profile?.identityCard ?: '—'}">—</div></div></div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-section">
+            <!-- Form cập nhật thông tin -->
+            <div class="card">
+                <div class="card-head"><h2>Thông tin cá nhân</h2></div>
+                <div class="card-body">
+                    <form th:if="${editMode}" th:action="@{/patient/profile/update}" method="post" enctype="multipart/form-data">
+                        <div class="grid-2">
+                            <div class="form-group" style="grid-column:1/-1">
+                                <label>Họ và tên *</label>
+                                <input type="text" name="fullName" class="form-control" th:value="${profile?.fullName}" required/>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="text" class="form-control" th:value="${profile?.email}" readonly/>
+                            </div>
+                            <div class="form-group">
+                                <label>Số điện thoại</label>
+                                <input type="text" name="phoneNumber" class="form-control" th:value="${profile?.phoneNumber}"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Ngày sinh</label>
+                                <input type="date" name="dateOfBirth" class="form-control"
+                                       th:value="${profile?.dateOfBirth != null ? #temporals.format(profile.dateOfBirth,'yyyy-MM-dd') : ''}"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Giới tính</label>
+                                <select name="gender" class="form-control">
+                                    <option value="">Chọn giới tính</option>
+                                    <option value="MALE" th:selected="${profile?.gender?.name() == 'MALE'}">Nam</option>
+                                    <option value="FEMALE" th:selected="${profile?.gender?.name() == 'FEMALE'}">Nữ</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Số CCCD</label>
+                                <input type="text" name="identityCard" class="form-control" th:value="${profile?.identityCard}"/>
+                            </div>
+                            <div class="form-group" style="grid-column:1/-1">
+                                <label>Địa chỉ</label>
+                                <input type="text" name="address" class="form-control" th:value="${profile?.address}"/>
+                            </div>
+                            <div class="form-group" style="grid-column:1/-1">
+                                <label>Ảnh đại diện</label>
+                                <input type="file" name="avatarFile" class="form-control" accept="image/*"/>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:10px;margin-top:8px">
+                            <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
+                            <a th:href="@{/patient/profile}" class="btn btn-outline">Hủy</a>
+                        </div>
+                    </form>
+
+                    <!-- View mode -->
+                    <div th:if="${!editMode}" class="grid-2">
+                        <div class="form-group"><label>Họ và tên</label><input class="form-control" readonly th:value="${profile?.fullName ?: '—'}"/></div>
+                        <div class="form-group"><label>Email</label><input class="form-control" readonly th:value="${profile?.email ?: '—'}"/></div>
+                        <div class="form-group"><label>Số điện thoại</label><input class="form-control" readonly th:value="${profile?.phoneNumber ?: '—'}"/></div>
+                        <div class="form-group"><label>Ngày sinh</label><input class="form-control" readonly th:value="${profile?.dateOfBirth != null ? #temporals.format(profile.dateOfBirth,'dd/MM/yyyy') : '—'}"/></div>
+                        <div class="form-group"><label>Giới tính</label><input class="form-control" readonly th:value="${profile?.gender != null ? (profile.gender.name() == 'MALE' ? 'Nam' : 'Nữ') : '—'}"/></div>
+                        <div class="form-group"><label>Số CCCD</label><input class="form-control" readonly th:value="${profile?.identityCard ?: '—'}"/></div>
+                        <div class="form-group" style="grid-column:1/-1"><label>Địa chỉ</label><input class="form-control" readonly th:value="${profile?.address ?: '—'}"/></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Đổi mật khẩu -->
+            <div class="card">
+                <div class="card-head"><h2>🔐 Đổi mật khẩu</h2></div>
+                <div class="card-body">
+                    <form th:action="@{/patient/profile/change-password}" method="post">
+                        <div class="grid-2">
+                            <div class="form-group" style="grid-column:1/-1">
+                                <label>Mật khẩu hiện tại</label>
+                                <input type="password" name="currentPassword" class="form-control" required placeholder="Nhập mật khẩu hiện tại"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Mật khẩu mới</label>
+                                <input type="password" name="newPassword" class="form-control" required placeholder="Tối thiểu 6 ký tự"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Xác nhận mật khẩu</label>
+                                <input type="password" name="confirmNewPassword" class="form-control" required placeholder="Nhập lại mật khẩu mới"/>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">🔑 Đổi mật khẩu</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+</body>
+</html>

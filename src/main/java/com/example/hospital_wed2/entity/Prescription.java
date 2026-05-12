@@ -34,7 +34,7 @@ public class Prescription {
     @Enumerated(EnumType.STRING)
     private PrescriptionStatus status;
 
-    private String note;
+    private String notes;
     @Column(name = "dispensed_at")
     private LocalDateTime dispensedAt;
 
@@ -75,11 +75,11 @@ public class Prescription {
     }
 
     public String getNote() {
-        return note;
+        return notes;
     }
 
     public void setNote(String note) {
-        this.note = note;
+        this.notes = note;
     }
 
     public LocalDateTime getDispensedAt() {

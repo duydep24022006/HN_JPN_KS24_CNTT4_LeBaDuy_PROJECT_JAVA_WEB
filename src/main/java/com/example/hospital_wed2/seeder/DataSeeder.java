@@ -190,17 +190,17 @@ public class DataSeeder implements CommandLineRunner {
         // =====================================================
         Prescription pr1 = prescriptionRepo.save(Prescription.builder()
                 .medicalRecord(mr1).status(PrescriptionStatus.DISPENSED)
-                .note("Uống sau bữa ăn. Không lái xe sau khi uống thuốc. Tái khám nếu đau đầu nặng hơn.")
+                .notes("Uống sau bữa ăn. Không lái xe sau khi uống thuốc. Tái khám nếu đau đầu nặng hơn.")
                 .dispensedAt(LocalDateTime.now().minusDays(4)).build());
 
         Prescription pr2 = prescriptionRepo.save(Prescription.builder()
                 .medicalRecord(mr2).status(PrescriptionStatus.DISPENSED)
-                .note("Uống thuốc đều đặn hàng ngày, không tự ý ngừng thuốc. Đo huyết áp tại nhà mỗi sáng.")
+                .notes("Uống thuốc đều đặn hàng ngày, không tự ý ngừng thuốc. Đo huyết áp tại nhà mỗi sáng.")
                 .dispensedAt(LocalDateTime.now().minusDays(2)).build());
 
         Prescription pr3 = prescriptionRepo.save(Prescription.builder()
                 .medicalRecord(mr3).status(PrescriptionStatus.PENDING)
-                .note("Uống trước bữa ăn 30 phút. Kiêng rượu bia, đồ cay, chua trong thời gian điều trị.")
+                .notes("Uống trước bữa ăn 30 phút. Kiêng rượu bia, đồ cay, chua trong thời gian điều trị.")
                 .build());
 
         // =====================================================

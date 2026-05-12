@@ -11,7 +11,21 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    // BUG-18: Không để White Label Error page lộ stack trace
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public String handleResourceNotFound(ResourceNotFoundException e, Model model) {
+        log.warn("Resource not found: {}", e.getMessage());
+        model.addAttribute("errorCode", "404");
+        model.addAttribute("errorMessage", e.getMessage());
+        return "error/generic";
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public String handleUnauthorized(UnauthorizedException e, Model model) {
+        log.warn("Unauthorized access: {}", e.getMessage());
+        model.addAttribute("errorCode", "403");
+        model.addAttribute("errorMessage", e.getMessage());
+        return "error/generic";
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public String handleBadRequest(IllegalArgumentException e, Model model) {
@@ -43,8 +57,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public String handleGeneral(Exception e, Model model) {
-        // Log đầy đủ ở server, không lộ ra người dùng
-        log.error("Unhandled exception: {}", e.getMessage(), e);
+        log.error("Unhandled exception occurred", e);
         model.addAttribute("errorCode", "500");
         model.addAttribute("errorMessage", "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.");
         return "error/generic";

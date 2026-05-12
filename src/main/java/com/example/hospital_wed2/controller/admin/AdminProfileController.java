@@ -1,10 +1,11 @@
 package com.example.hospital_wed2.controller.admin;
 
-import com.example.hospital_wed2.dto.profile.ChangePasswordRequest;
-import com.example.hospital_wed2.dto.profile.UpdateProfileRequest;
-import com.example.hospital_wed2.dto.profile.UserProfileResponse;
+
+import com.example.hospital_wed2.dto.profile.shared.ChangePasswordRequest;
+import com.example.hospital_wed2.dto.profile.shared.UpdateProfileRequest;
+import com.example.hospital_wed2.dto.profile.shared.UserProfileResponse;
 import com.example.hospital_wed2.service.FileStorageService;
-import com.example.hospital_wed2.service.profile.ProfileService;
+import com.example.hospital_wed2.service.admin.AdminProfileService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
@@ -20,10 +21,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/admin/profile")
 public class AdminProfileController {
 
-    private final ProfileService profileService;
+    private final AdminProfileService profileService;
     private final FileStorageService fileStorageService;
 
-    public AdminProfileController(ProfileService profileService,
+    public AdminProfileController(AdminProfileService profileService,
                                   FileStorageService fileStorageService) {
         this.profileService = profileService;
         this.fileStorageService = fileStorageService;

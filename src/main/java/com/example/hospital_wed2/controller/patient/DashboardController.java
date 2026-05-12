@@ -1,11 +1,10 @@
 package com.example.hospital_wed2.controller.patient;
 
+import com.example.hospital_wed2.dto.patient.PatientDashboardData;
 import com.example.hospital_wed2.entity.AppointmentStatus;
-import com.example.hospital_wed2.entity.User;
-import com.example.hospital_wed2.repository.AppointmentRepository;
-import com.example.hospital_wed2.repository.MedicalRecordRepository;
-import com.example.hospital_wed2.repository.UserRepository;
-import com.example.hospital_wed2.service.profile.ProfileService;
+import com.example.hospital_wed2.service.patient.PatientAppointmentService;
+import com.example.hospital_wed2.service.patient.PatientDashboardService;
+import com.example.hospital_wed2.service.patient.PatientProfileService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -19,34 +18,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class DashboardController {
 
-    private final UserRepository userRepository;
-    private final AppointmentRepository appointmentRepository;
-    private final MedicalRecordRepository medicalRecordRepository;
-    private final ProfileService profileService;
+    private final PatientDashboardService patientDashboardService;
+    private final PatientProfileService patientProfileService;
+    private final PatientAppointmentService patientAppointmentService;
+
     @GetMapping
-    public String dashboard(Model model,
-                            Authentication auth,
-                            HttpServletRequest request) {
+    public String dashboard(Model model, Authentication auth, HttpServletRequest request) {
+        String email = auth.getName();
 
-        User patient = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        PatientDashboardData data = patientDashboardService.getDashboardData(email);
 
-        var profile = profileService.getMyProfile(auth.getName());
-        model.addAttribute("profile", profile);
+        // Flat attributes cho template
+        model.addAttribute("profile",               patientProfileService.getMyProfile(email));
+        model.addAttribute("totalAppointments",     data.getTotalAppointments());
+        model.addAttribute("countConfirmed",        data.getConfirmedAppointments());
+        model.addAttribute("countPending",          data.getPendingAppointments());
+        model.addAttribute("totalRecords",          data.getTotalMedicalRecords());
 
-        var confirmed = appointmentRepository.findByPatientAndStatus(patient, AppointmentStatus.CONFIRMED);
-        var pending   = appointmentRepository.findByPatientAndStatus(patient, AppointmentStatus.PENDING);
-        var allAppts  = appointmentRepository.findByPatientWithDetails(patient);
-        var records   = medicalRecordRepository.findByPatientWithDetails(patient);
+        // Danh sách lịch hẹn cho widget "Lịch hẹn sắp tới"
+        model.addAttribute("upcomingAppointments",
+                patientAppointmentService.getMyAppointmentsByStatus(email, AppointmentStatus.CONFIRMED));
+        model.addAttribute("pendingAppointments",
+                patientAppointmentService.getMyAppointmentsByStatus(email, AppointmentStatus.PENDING));
 
-        model.addAttribute("upcomingAppointments", confirmed);
-        model.addAttribute("pendingAppointments", pending);
-        model.addAttribute("totalAppointments", allAppts.size());
-        model.addAttribute("totalRecords", records.size());
-        model.addAttribute("countConfirmed", confirmed.size());
-        model.addAttribute("countPending", pending.size());
-
-        // THÊM DÒNG NÀY
         model.addAttribute("currentUri", request.getRequestURI());
 
         return "patient/dashboard";

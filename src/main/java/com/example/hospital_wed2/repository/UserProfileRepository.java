@@ -9,6 +9,5 @@ public interface UserProfileRepository extends JpaRepository<UserProfile,Long> {
     Optional<UserProfile> findByUserId(Long userId);
     boolean existsByPhoneNumber(String phoneNumber);
     boolean existsByUserId(Long userId);
-    // FIX: Thêm method check phone trùng khi update (bỏ qua chính mình)
     boolean existsByPhoneNumberAndIdNot(String phoneNumber, Long id);
 }

@@ -3,7 +3,8 @@ package com.example.hospital_wed2.controller.admin;
 import com.example.hospital_wed2.dto.admin.AdminDoctorDto;
 import com.example.hospital_wed2.entity.Gender;
 import com.example.hospital_wed2.service.admin.AdminDoctorService;
-import com.example.hospital_wed2.service.admin.SpecialtyService;
+import com.example.hospital_wed2.service.admin.AdminSpecialtyService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -13,14 +14,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping({"/admin/doctors"})
+@RequestMapping("/admin/doctors")
 @RequiredArgsConstructor
 public class AdminDoctorsController {
 
     private final AdminDoctorService doctorService;
-    private final SpecialtyService specialtyService;
-
-    // ================= LIST + SEARCH =================
+    private final AdminSpecialtyService specialtyService;
 
     @GetMapping
     public String listDoctors(
@@ -28,98 +27,79 @@ public class AdminDoctorsController {
             @RequestParam(required = false) Long specialtyId,
             @RequestParam(required = false) Boolean active,
             @RequestParam(required = false) Gender gender,
-            Model model
-    ) {
-        boolean hasFilter = (keyword != null && !keyword.isBlank())
-                || specialtyId != null || active != null || gender != null;
+            Model model,
+            HttpServletRequest request) {
 
-        if (hasFilter) {
-            model.addAttribute("doctors", doctorService.searchDoctors(keyword, specialtyId, active, gender));
-        } else {
-            model.addAttribute("doctors", doctorService.getAllDoctors());
-        }
-
-        model.addAttribute("specialties", specialtyService.findAllSpecialties());
+        model.addAttribute("doctors", doctorService.searchDoctors(keyword, specialtyId, active, gender));
+        model.addAttribute("specialties", specialtyService.findAll());
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedSpecialty", specialtyId);
         model.addAttribute("selectedActive", active);
         model.addAttribute("selectedGender", gender);
         model.addAttribute("genders", Gender.values());
+        model.addAttribute("currentUri", request.getRequestURI());
 
         return "admin/doctor";
     }
 
-    // ================= CREATE FORM =================
-
     @GetMapping("/create")
     public String createForm(Model model) {
         model.addAttribute("doctor", new AdminDoctorDto());
-        model.addAttribute("specialties", specialtyService.findAllSpecialties());
+        model.addAttribute("specialties", specialtyService.findAll());
         model.addAttribute("genders", Gender.values());
         return "admin/doctor-form";
     }
-
-    // ================= EDIT FORM =================
 
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Long id, Model model) {
         model.addAttribute("doctor", doctorService.getDoctorById(id));
-        model.addAttribute("specialties", specialtyService.findAllSpecialties());
+        model.addAttribute("specialties", specialtyService.findAll());
         model.addAttribute("genders", Gender.values());
         return "admin/doctor-form";
     }
-
-    // ================= SAVE =================
 
     @PostMapping("/save")
     public String saveDoctor(
             @Valid @ModelAttribute("doctor") AdminDoctorDto dto,
             BindingResult result,
             Model model,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes ra) {
+
         if (result.hasErrors()) {
-            model.addAttribute("specialties", specialtyService.findAllSpecialties());
+            model.addAttribute("specialties", specialtyService.findAll());
             model.addAttribute("genders", Gender.values());
             return "admin/doctor-form";
         }
 
         try {
             doctorService.saveDoctor(dto);
-            redirectAttributes.addFlashAttribute("successMessage",
+            ra.addFlashAttribute("successMessage",
                     dto.getId() != null ? "Cập nhật bác sĩ thành công!" : "Thêm bác sĩ thành công!");
             return "redirect:/admin/doctors";
-        } catch (RuntimeException e) {
-            model.addAttribute("specialties", specialtyService.findAllSpecialties());
-            model.addAttribute("genders", Gender.values());
-            model.addAttribute("errorMessage", e.getMessage());
-            return "admin/doctor-form";
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/doctors";
         }
     }
 
-    // ================= TOGGLE ACTIVE =================
-    // FIX: Tách toggle và delete thành 2 action riêng
-
-    @PostMapping("/toggle/{id}")
-    public String toggleActive(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    @PostMapping({"/{id}/toggle", "/toggle/{id}"})
+    public String toggleStatus(@PathVariable Long id, RedirectAttributes ra) {
         try {
-            doctorService.toggleDoctor(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật trạng thái bác sĩ");
+            doctorService.toggleDoctorStatus(id);
+            ra.addFlashAttribute("successMessage", "Đã thay đổi trạng thái bác sĩ");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            ra.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/doctors";
     }
 
-    // ================= DELETE (soft delete - vô hiệu hóa) =================
-
-    @PostMapping("/delete/{id}")
-    public String deleteDoctor(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    @PostMapping({"/{id}/delete", "/delete/{id}"})
+    public String deleteDoctor(@PathVariable Long id, RedirectAttributes ra) {
         try {
             doctorService.deleteDoctor(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã vô hiệu hóa bác sĩ");
+            ra.addFlashAttribute("successMessage", "Đã vô hiệu hóa bác sĩ");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            ra.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/doctors";
     }

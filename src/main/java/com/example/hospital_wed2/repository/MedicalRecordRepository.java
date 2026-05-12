@@ -24,4 +24,11 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Lo
     // Tìm bệnh án theo appointmentId
     // Dùng để kiểm tra lịch hẹn đã có bệnh án chưa
     Optional<MedicalRecord> findByAppointmentId(Long appointmentId);
+
+    @Query("SELECT COUNT(mr) FROM MedicalRecord mr JOIN mr.appointment a WHERE a.patient = :patient")
+    long countByPatient(@Param("patient") User patient);
+
+
+
+    boolean existsByAppointmentId(Long appointmentId);
 }

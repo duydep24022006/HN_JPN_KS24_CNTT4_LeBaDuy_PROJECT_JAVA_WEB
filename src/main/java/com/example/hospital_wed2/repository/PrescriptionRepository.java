@@ -30,6 +30,7 @@ public interface PrescriptionRepository extends JpaRepository<Prescription,Long>
 
     // Lấy danh sách đơn thuốc theo trạng thái
 // Ví dụ: PENDING, COMPLETED, CANCELLED...
+    @Query("SELECT p FROM Prescription p WHERE p.status = :status")
     List<Prescription> findByStatus(PrescriptionStatus status);
 
     // Query tìm đơn thuốc theo status nhưng cho phép status = null
@@ -43,11 +44,11 @@ public interface PrescriptionRepository extends JpaRepository<Prescription,Long>
     Optional<Prescription> findByAppointmentId(@Param("appointmentId") Long appointmentId);
 
     // Đếm số lượng đơn thuốc theo trạng thái
-// Tối ưu hơn so với findAll rồi stream/filter bằng Java
+    // Tối ưu hơn so với findAll rồi stream/filter bằng Java
     long countByStatus(PrescriptionStatus status);
 
     // Lấy danh sách đơn thuốc theo status kèm đầy đủ dữ liệu liên quan
-// Dùng EntityGraph để tránh lỗi N+1 query
+    // Dùng EntityGraph để tránh lỗi N+1 query
     @EntityGraph(attributePaths = {
             "medicalRecord",
             "medicalRecord.appointment",
@@ -65,4 +66,14 @@ public interface PrescriptionRepository extends JpaRepository<Prescription,Long>
 // Dùng cho dashboard hoặc thống kê gần đây
     @Query("SELECT p FROM Prescription p ORDER BY p.createdAt DESC LIMIT 5")
     List<Prescription> findTop5ByOrderByCreatedAtDesc();
+
+
+    @Query("SELECT COUNT(p) FROM Prescription p WHERE p.status = com.example.hospital_wed2.entity.PrescriptionStatus.PENDING")
+    long countByStatusPending();
+
+    // Đếm đơn thuốc theo bác sĩ và trạng thái (dùng cho trang medical-records của bác sĩ)
+    @Query("SELECT COUNT(p) FROM Prescription p WHERE p.medicalRecord.appointment.doctor = :doctor AND p.status = :status")
+    long countByDoctorAndStatus(
+            @Param("doctor") com.example.hospital_wed2.entity.Doctor doctor,
+            @Param("status") PrescriptionStatus status);
 }
